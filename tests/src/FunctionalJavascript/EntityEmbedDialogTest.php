@@ -98,7 +98,7 @@ class EntityEmbedDialogTest extends EntityEmbedTestBase {
     // Ensure that the route is accessible with a valid embed button.
     // 'Node' embed button is provided by default by the module and hence the
     // request must be successful.
-    $this->getEmbedDialog('custom_format', 'node');
+    $this->drupalGet('/entity-embed/dialog/custom_format/node');
 
     // Ensure form structure of the 'select' step and submit form.
     $this->assertSession()->fieldExists('entity_id');
@@ -127,7 +127,7 @@ class EntityEmbedDialogTest extends EntityEmbedTestBase {
       ->set('rendered_entity_mode', TRUE)->save();
     $this->container->get('plugin.manager.entity_embed.display')->clearCachedDefinitions();
 
-    $this->getEmbedDialog('custom_format', 'node');
+    $this->drupalGet('/entity-embed/dialog/custom_format/node');
     $title = $this->node->getTitle() . ' (' . $this->node->id() . ')';
     $this->assertSession()->fieldExists('entity_id')->setValue($title);
     $this->assertSession()->buttonExists('Next')->press();

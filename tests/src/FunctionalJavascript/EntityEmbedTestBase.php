@@ -22,28 +22,6 @@ abstract class EntityEmbedTestBase extends WebDriverTestBase {
   ];
 
   /**
-   * Retrieves an embed dialog based on given parameters.
-   *
-   * @param string $filter_format_id
-   *   ID of the filter format.
-   * @param string $embed_button_id
-   *   ID of the embed button.
-   *
-   * @return string
-   *   The retrieved HTML string.
-   */
-  public function getEmbedDialog($filter_format_id = NULL, $embed_button_id = NULL) {
-    $url = 'entity-embed/dialog';
-    if (!empty($filter_format_id)) {
-      $url .= '/' . $filter_format_id;
-      if (!empty($embed_button_id)) {
-        $url .= '/' . $embed_button_id;
-      }
-    }
-    return $this->drupalGet($url);
-  }
-
-  /**
    * Assigns a name to the CKEditor iframe, to allow use of ::switchToIFrame().
    *
    * @see \Behat\Mink\Session::switchToIFrame()

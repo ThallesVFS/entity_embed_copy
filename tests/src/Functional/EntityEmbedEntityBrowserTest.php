@@ -25,7 +25,7 @@ class EntityEmbedEntityBrowserTest extends EntityEmbedDialogTest {
    * Tests the entity browser integration.
    */
   public function testEntityEmbedEntityBrowserIntegration() {
-    $this->getEmbedDialog('custom_format', 'node');
+    $this->drupalGet('/entity-embed/dialog/custom_format/node');
     // Verify embed dialog is accessible with custom filter format and
     // default embed button.
     $this->assertSession()->statusCodeEquals(200);
@@ -64,7 +64,7 @@ class EntityEmbedEntityBrowserTest extends EntityEmbedDialogTest {
     $dependencies = $embed_button->getDependencies();
     $this->assertContains('entity_browser.browser.entity_embed_entity_browser_test', $dependencies['config']);
 
-    $this->getEmbedDialog('custom_format', 'node');
+    $this->drupalGet('/entity-embed/dialog/custom_format/node');
 
     // Verify embed dialog is accessible with custom filter format and
     // default embed button.
