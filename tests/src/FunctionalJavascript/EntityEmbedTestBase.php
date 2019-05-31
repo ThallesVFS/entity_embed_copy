@@ -37,9 +37,24 @@ JS;
 
   /**
    * Waits for CKEditor to initialize.
+   *
+   * @param string $instance_id
+   *   The CKEditor instance ID.
+   * @param int $timeout
+   *   (optional) Timeout in milliseconds, defaults to 10000.
    */
-  protected function waitForEditor() {
-    $this->getSession()->wait(5000, "(typeof CKEDITOR != 'undefined' && typeof CKEDITOR.instances['edit-body-0-value'] != 'undefined' && CKEDITOR.instances['edit-body-0-value'].instanceReady)");
+  protected function waitForEditor($instance_id = 'edit-body-0-value', $timeout = 10000) {
+    $condition = <<<JS
+      (function() {
+        return (
+          typeof CKEDITOR !== 'undefined'
+          && typeof CKEDITOR.instances["$instance_id"] !== 'undefined'
+          && CKEDITOR.instances["$instance_id"].instanceReady
+        );
+      }());
+JS;
+
+    $this->getSession()->wait($timeout, $condition);
   }
 
 }

@@ -66,6 +66,7 @@
           };
 
           var saveCallback = function (values) {
+            editor.fire('saveSnapshot');
             var entityElement = editor.document.createElement('drupal-entity');
             var attributes = values.attributes;
             for (var key in attributes) {
@@ -79,6 +80,7 @@
               Drupal.runEmbedBehaviors('detach', existingElement.$);
               existingElement.remove();
             }
+            editor.fire('saveSnapshot');
           };
 
           // Open the entity embed dialog for corresponding EmbedButton.
@@ -110,19 +112,26 @@
         init: function () {
           /** @type {CKEDITOR.dom.element} */
           var element = this.element;
-          // Use the Ajax framework to fetch the HTML, so that we can retrieve
-          // out-of-band assets (JS, CSS...).
-          var entityEmbedPreview = Drupal.ajax({
-            base: element.getId(),
-            element: element.$,
-            url: Drupal.url('embed/preview/' + editor.config.drupal.format + '?' + $.param({
-              value: element.getOuterHtml()
-            })),
-            progress: {type: 'none'},
-            // Use a custom event to trigger the call.
-            event: 'entity_embed_dummy_event'
-          });
-          entityEmbedPreview.execute();
+          if (element.$.children.length === 0) {
+            // Use the Ajax framework to fetch the HTML, so that we can retrieve
+            // out-of-band assets (JS, CSS...).
+            var entityEmbedPreview = Drupal.ajax({
+              base: element.getId(),
+              element: element.$,
+              url: Drupal.url('embed/preview/' + editor.config.drupal.format + '?' + $.param({
+                value: element.getOuterHtml()
+              })),
+              progress: {type: 'none'},
+              // Use a custom event to trigger the call.
+              event: 'entity_embed_dummy_event'
+            });
+            entityEmbedPreview.commands.embed_insert = function (ajax, response, status) {
+              Drupal.AjaxCommands.prototype.embed_insert(ajax, response, status);
+              editor.fire('unlockSnapshot');
+            };
+            editor.fire('lockSnapshot');
+            entityEmbedPreview.execute();
+          }
         },
 
         // Downcast the element.
