@@ -10,6 +10,7 @@ use Drupal\Core\Ajax\SetDialogTitleCommand;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\TranslatableInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
@@ -254,7 +255,7 @@ class EntityEmbedDialog extends FormBase {
     // Attempt to display a better label if we can by getting it from
     // the label field definition.
     $entity_type = $this->entityTypeManager->getDefinition($entity_element['data-entity-type']);
-    if ($entity_type->isSubclassOf('\Drupal\Core\Entity\FieldableEntityInterface') && $entity_type->hasKey('label')) {
+    if ($entity_type->entityClassImplements(FieldableEntityInterface::class) && $entity_type->hasKey('label')) {
       $field_definitions = $this->entityFieldManager->getBaseFieldDefinitions($entity_type->id());
       if (isset($field_definitions[$entity_type->getKey('label')])) {
         $label = $field_definitions[$entity_type->getKey('label')]->getLabel();
