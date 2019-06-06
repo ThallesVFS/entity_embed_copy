@@ -2,8 +2,12 @@
 
 namespace Drupal\Tests\entity_embed\Functional;
 
+use Drupal\Component\Utility\Html;
 use Drupal\language\Entity\ConfigurableLanguage;
+use Drupal\file\Entity\File;
+use Drupal\media\Entity\Media;
 use Drupal\node\Entity\Node;
+use Drupal\filter\FilterPluginCollection;
 
 /**
  * Tests the entity_embed filter.
@@ -26,6 +30,24 @@ class EntityEmbedFilterTest extends EntityEmbedTestBase {
     'node',
     'ckeditor',
   ];
+
+  /**
+   * The entity embed filter.
+   *
+   * @var \Drupal\entity_embed\Plugin\Filter\EntityEmbedFilter
+   */
+  protected $filter;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    $manager = $this->container->get('plugin.manager.filter');
+    $bag = new FilterPluginCollection($manager, []);
+    $this->filter = $bag->get('entity_embed');
+  }
 
   /**
    * Tests the entity_embed filter.
@@ -314,6 +336,132 @@ class EntityEmbedFilterTest extends EntityEmbedTestBase {
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains($translated_host_entity->getTitle());
     $this->assertSession()->pageTextContains($this->node->getTitle());
+  }
+
+  /**
+   * Tests that embeds are not render cached, and can have per-embed overrides.
+   */
+  public function testOverridesAndRenderCaching() {
+    \Drupal::service('file_system')->copy(\Drupal::root() . '/core/misc/druplicon.png', 'public://batfish.jpg');
+    /** @var \Drupal\file\FileInterface $file */
+    $file = File::create([
+      'uri' => 'public://batfish.jpg',
+      'uid' => $this->webUser->id(),
+    ]);
+    $file->save();
+
+    $this->createNode([
+      'type' => 'article',
+      'title' => 'Red-lipped batfish',
+    ]);
+
+    $media = Media::create([
+      'bundle' => 'image',
+      'name' => 'Screaming hairy armadillo',
+      'field_media_image' => [
+        [
+          'target_id' => $file->id(),
+          'alt' => 'default alt',
+          'title' => 'default title',
+        ],
+      ],
+    ]);
+    $media->save();
+
+    // Test the same embed with different alt and title text.
+    $input = $this->createEmbedCode([
+      'alt' => 'alt 1',
+      'title' => 'title 1',
+      'data-embed-button' => 'test_media_entity_embed',
+      'data-entity-embed-display' => 'view_mode:media.embed',
+      'data-entity-embed-display-settings' => '',
+      'data-entity-type' => 'media',
+      'data-entity-uuid' => $media->uuid(),
+      'data-langcode' => 'en',
+    ]);
+    $input .= $this->createEmbedCode([
+      'alt' => 'alt 2',
+      'title' => 'title 2',
+      'data-embed-button' => 'test_media_entity_embed',
+      'data-entity-embed-display' => 'view_mode:media.embed',
+      'data-entity-embed-display-settings' => '',
+      'data-entity-type' => 'media',
+      'data-entity-uuid' => $media->uuid(),
+      'data-langcode' => 'en',
+    ]);
+    $input .= $this->createEmbedCode([
+      'alt' => 'alt 3',
+      'title' => 'title 3',
+      'data-embed-button' => 'test_media_entity_embed',
+      'data-entity-embed-display' => 'view_mode:media.embed',
+      'data-entity-embed-display-settings' => '',
+      'data-entity-type' => 'media',
+      'data-entity-uuid' => $media->uuid(),
+      'data-langcode' => 'en',
+    ]);
+
+    /** @var \Drupal\filter\FilterProcessResult $filter_result */
+    $filter_result = $this->filter->process($input, 'en');
+    $output = $filter_result->getProcessedText();
+    $this->assertNotContains('drupal-entity data-entity-type="media" data-entity', $output);
+    $this->assertNotContains('This placeholder should not be rendered.', $output);
+    $dom = Html::load($output);
+    $xpath = new \DOMXPath($dom);
+
+    $img1 = $xpath->query("//img[contains(@alt, 'alt 1')]")[0];
+    $this->assertNotEmpty($img1);
+    $this->assertHasAttributes($img1, [
+      'alt' => 'alt 1',
+      'title' => 'title 1',
+    ]);
+
+    $img2 = $xpath->query("//img[contains(@alt, 'alt 2')]")[0];
+    $this->assertNotEmpty($img2);
+    $this->assertHasAttributes($img2, [
+      'alt' => 'alt 2',
+      'title' => 'title 2',
+    ]);
+
+    $img3 = $xpath->query("//img[contains(@alt, 'alt 3')]")[0];
+    $this->assertNotEmpty($img3);
+    $this->assertHasAttributes($img3, [
+      'alt' => 'alt 3',
+      'title' => 'title 3',
+    ]);
+  }
+
+  /**
+   * Creates an embed code with the given attributes.
+   *
+   * @param array $attributes
+   *   The attributes to set.
+   *
+   * @return string
+   *   A HTML string containing a <drupal-entity> tag with the given attributes.
+   */
+  protected function createEmbedCode(array $attributes) {
+    $dom = Html::load('<drupal-entity>This placeholder should not be rendered.</drupal-entity>');
+    $xpath = new \DOMXPath($dom);
+    $drupal_entity = $xpath->query('//drupal-entity')[0];
+    foreach ($attributes as $attribute => $value) {
+      $drupal_entity->setAttribute($attribute, $value);
+    }
+    return Html::serialize($dom);
+  }
+
+  /**
+   * Asserts that the DOMNode object has the given attributes.
+   *
+   * @param \DOMNode $node
+   *   The DOMNode object to check.
+   * @param array $attributes
+   *   An array with attribute names as keys and expected attribute values as
+   *   values.
+   */
+  protected function assertHasAttributes(\DOMNode $node, array $attributes) {
+    foreach ($attributes as $attribute => $value) {
+      $this->assertEquals($value, $node->getAttribute($attribute));
+    }
   }
 
 }
