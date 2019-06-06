@@ -38,19 +38,6 @@ class EntityEmbedDisplayManager extends DefaultPluginManager {
   }
 
   /**
-   * Overrides DefaultPluginManager::processDefinition().
-   */
-  public function processDefinition(&$definition, $plugin_id) {
-    $definition += [
-      'entity_types' => FALSE,
-    ];
-
-    if ($definition['entity_types'] !== FALSE && !is_array($definition['entity_types'])) {
-      $definition['entity_types'] = [$definition['entity_types']];
-    }
-  }
-
-  /**
    * Determines plugins whose constraints are satisfied by a set of contexts.
    *
    * @param array $contexts
