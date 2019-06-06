@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\entity_embed\Plugin\entity_embed\EntityEmbedDisplay\MediaImageDecorator;
 
 /**
  * Provides an Entity Embed display plugin manager.
@@ -111,7 +112,12 @@ class EntityEmbedDisplayManager extends DefaultPluginManager {
    *   An array of valid plugin labels, keyed by plugin ID.
    */
   public function getDefinitionOptionsForContext(array $context) {
-    assert(empty(array_diff_key($context, ['entity' => TRUE, 'entity_type' => TRUE, 'embed_button' => TRUE])));
+    $values = [
+      'entity' => TRUE,
+      'entity_type' => TRUE,
+      'embed_button' => TRUE,
+    ];
+    assert(empty(array_diff_key($context, $values)));
     $definitions = $this->getDefinitionsForContexts($context);
     $definitions = $this->filterExposedDefinitions($definitions);
     $options = array_map(function ($definition) {
@@ -174,6 +180,23 @@ class EntityEmbedDisplayManager extends DefaultPluginManager {
     return array_map(function ($definition) {
       return (string) $definition['label'];
     }, $definitions);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function createInstance($plugin_id, array $configuration = []) {
+    $instance = parent::createInstance($plugin_id, $configuration);
+    $definition = $instance->getPluginDefinition();
+
+    if (empty($definition['supports_image_alt_and_title'])) {
+      return $instance;
+    }
+    else {
+      // Use decorator pattern to add alt and title fields to dialog when
+      // embedding media with image source.
+      return new MediaImageDecorator($instance);
+    }
   }
 
 }

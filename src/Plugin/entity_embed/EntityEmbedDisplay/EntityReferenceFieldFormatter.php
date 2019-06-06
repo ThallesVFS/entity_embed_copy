@@ -21,7 +21,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "entity_reference",
  *   label = @Translation("Entity Reference"),
  *   deriver = "Drupal\entity_embed\Plugin\Derivative\FieldFormatterDeriver",
- *   field_type = "entity_reference"
+ *   field_type = "entity_reference",
+ *   supports_image_alt_and_title = TRUE
  * )
  */
 class EntityReferenceFieldFormatter extends FieldFormatterEntityEmbedDisplayBase {

@@ -64,6 +64,9 @@ class ViewModeDeriver extends DeriverBase implements ContainerDeriverInterface {
         $this->derivatives[$definition['id']]['view_mode'] = $view_mode;
         $this->derivatives[$definition['id']]['entity_types'] = $definition['targetEntityType'];
         $this->derivatives[$definition['id']]['no_ui'] = $mode;
+        if ($definition['targetEntityType'] === 'media') {
+          $this->derivatives[$definition['id']]['supports_image_alt_and_title'] = TRUE;
+        }
       }
     }
     return $this->derivatives;

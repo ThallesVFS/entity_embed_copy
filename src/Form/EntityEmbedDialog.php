@@ -488,7 +488,10 @@ class EntityEmbedDialog extends FormBase {
     ];
     $plugin_id = !empty($values['attributes']['data-entity-embed-display']) ? $values['attributes']['data-entity-embed-display'] : $entity_element['data-entity-embed-display'];
     if (!empty($plugin_id)) {
-      if (is_string($entity_element['data-entity-embed-display-settings'])) {
+      if (empty($entity_element['data-entity-embed-display-settings'])) {
+        $entity_element['data-entity-embed-display-settings'] = [];
+      }
+      elseif (is_string($entity_element['data-entity-embed-display-settings'])) {
         $entity_element['data-entity-embed-display-settings'] = Json::decode($entity_element['data-entity-embed-display-settings']);
       }
       $display = $this->entityEmbedDisplayManager->createInstance($plugin_id, $entity_element['data-entity-embed-display-settings']);
