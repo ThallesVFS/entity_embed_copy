@@ -7,7 +7,7 @@ drupal-entity {
   display: inline-block;
 }
 drupal-entity[data-align=left],
-drupal-entity[data-align=right]{
+drupal-entity[data-align=right] {
   display: inline;
 }
 drupal-entity[data-align=center] {
