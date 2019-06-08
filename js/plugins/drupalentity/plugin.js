@@ -7,6 +7,48 @@
 
   "use strict";
 
+  function getFocusedWidget(editor) {
+    var widget = editor.widgets.focused;
+
+    if (widget && widget.name === 'drupalentity') {
+      return widget;
+    }
+
+    return null;
+  }
+
+  function linkCommandIntegrator(editor) {
+    if (!editor.plugins.drupallink) {
+      return;
+    }
+
+    editor.getCommand('drupalunlink').on('exec', function (evt) {
+      var widget = getFocusedWidget(editor);
+
+      if (!widget) {
+        return;
+      }
+
+      widget.setData('link', null);
+
+      this.refresh(editor, editor.elementPath());
+
+      evt.cancel();
+    });
+
+    editor.getCommand('drupalunlink').on('refresh', function (evt) {
+      var widget = getFocusedWidget(editor);
+
+      if (!widget) {
+        return;
+      }
+
+      this.setState(widget.data.link ? CKEDITOR.TRISTATE_OFF : CKEDITOR.TRISTATE_DISABLED);
+
+      evt.cancel();
+    });
+  }
+
   CKEDITOR.plugins.add('drupalentity', {
     // This plugin requires the Widgets System defined in the 'widget' plugin.
     requires: 'widget',
@@ -24,6 +66,28 @@
           dtd[tagName]['drupal-entity'] = 1;
         }
       }
+      dtd['a']['drupal-entity'] = 1;
+
+      // drupallink has a hardcoded integration with drupalimage. Work around that, to reuse the same integration.
+
+      var originalGetFocusedWidget = null;
+      if (CKEDITOR.plugins.drupalimage) {
+        originalGetFocusedWidget = CKEDITOR.plugins.drupalimage.getFocusedWidget;
+      }
+      else {
+        CKEDITOR.plugins.drupalimage = {};
+      }
+      CKEDITOR.plugins.drupalimage.getFocusedWidget = function () {
+        var ourFocusedWidget = getFocusedWidget(editor);
+        if (ourFocusedWidget) {
+          return ourFocusedWidget;
+        }
+        // If drupalimage is loaded, call that next, to not break its link command integration.
+        if (CKEDITOR.plugins.drupalimage) {
+          return originalGetFocusedWidget(editor);
+        }
+        return null;
+      };
 
       // Generic command for adding/editing entities of all types.
       editor.addCommand('editdrupalentity', {
@@ -105,6 +169,14 @@
             return;
           }
           data.attributes = CKEDITOR.tools.copy(attributes);
+          data.link = null;
+          if (element.parent.name === 'a') {
+            data.link = CKEDITOR.tools.copy(element.parent.attributes);
+            // @todo Ask CKEditor team how to get rid of this, see CKEDITOR.plugins.link.getLinkAttributes
+            if (data.link['data-cke-saved-href']) {
+              delete data.link['data-cke-saved-href'];
+            }
+          }
           return element;
         },
 
@@ -187,6 +259,9 @@
           var dataToHash = CKEDITOR.tools.clone(data);
           if (dataToHash.attributes['data-caption']) {
             delete dataToHash.attributes['data-caption'];
+          }
+          if (dataToHash.link && dataToHash.link.href) {
+            delete dataToHash.link.href;
           }
           return JSON.stringify(dataToHash);
         },
@@ -283,6 +358,10 @@
           }
         });
       }
+    },
+
+    afterInit: function (editor) {
+      linkCommandIntegrator(editor);
     }
   });
 
