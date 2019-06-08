@@ -70,6 +70,9 @@
               // Detach the behaviors that were attached when the entity content
               // was inserted.
               Drupal.runEmbedBehaviors('detach', existingElement.$);
+              if (values.attributes['data-caption']) {
+                values.attributes['data-caption'] = CKEDITOR.tools.htmlDecodeAttr(values.attributes['data-caption']);
+              }
               existingWidget.setData({ attributes: values.attributes });
             }
             editor.fire('saveSnapshot');
@@ -87,6 +90,14 @@
         requiredContent: 'drupal-entity[data-entity-type,data-entity-uuid,data-entity-embed-display,data-entity-embed-display-settings,data-align,data-caption]',
 
         pathName: Drupal.t('Embedded entity'),
+
+        editables: {
+          caption: {
+            selector: 'figcaption',
+            allowedContent: 'a[!href]; em strong cite code br',
+            pathName: Drupal.t('Caption'),
+          }
+        },
 
         upcast: function (element, data) {
           var attributes = element.attributes;
@@ -111,10 +122,17 @@
           }
         },
 
+        destroy: function() {
+          this._tearDownDynamicEditables();
+        },
+
         data: function (event) {
           if (this._previewNeedsUpdate()) {
             editor.fire('lockSnapshot');
+            this._tearDownDynamicEditables();
+
             this._loadPreview(function (widget) {
+              widget._setUpDynamicEditables();
               editor.fire('unlockSnapshot');
             });
           }
@@ -132,6 +150,28 @@
             downcastElement = link;
           }
           return downcastElement;
+        },
+
+        _setUpDynamicEditables() {
+          // Now that the caption is available in the DOM, make it editable.
+          if (this.initEditable('caption', this.definition.editables.caption)) {
+            // And ensure that any changes made to it are persisted.
+            var captionDomNode = this.editables.caption.$;
+            var config = {characterData: true, attributes: false, childList: true, subtree: true};
+            var widget = this;
+            this.captionEditableMutationObserver = new MutationObserver(function () {
+              var entityAttributes = CKEDITOR.tools.clone(widget.data.attributes);
+              entityAttributes['data-caption'] = captionDomNode.innerHTML;
+              widget.setData('attributes', entityAttributes);
+            });
+            this.captionEditableMutationObserver.observe(captionDomNode, config);
+          }
+        },
+
+        _tearDownDynamicEditables() {
+          if (this.captionEditableMutationObserver) {
+            this.captionEditableMutationObserver.disconnect();
+          }
         },
 
         _previewNeedsUpdate() {
