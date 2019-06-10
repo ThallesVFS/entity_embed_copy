@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\entity_embed\FunctionalJavascript;
 
+use Drupal\Component\Utility\Html;
 use Drupal\entity_embed\Plugin\entity_embed\EntityEmbedDisplay\MediaImageDecorator;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\file\Entity\File;
@@ -22,6 +23,27 @@ class MediaImageTest extends EntityEmbedTestBase {
   protected $adminUser;
 
   /**
+   * A file entity to reference on the media's image field.
+   *
+   * @var \Drupal\file\Entity\File
+   */
+  protected $file;
+
+  /**
+   * A media entity used for embedding.
+   *
+   * @var \Drupal\media\Entity\Media
+   */
+  protected $media;
+
+  /**
+   * A host entity with ckeditor body field.
+   *
+   * @var \Drupal\node\Entity\Node
+   */
+  protected $host;
+
+  /**
    * {@inheritdoc}
    */
   public static $modules = ['entity_embed_test'];
@@ -37,39 +59,34 @@ class MediaImageTest extends EntityEmbedTestBase {
       'administer nodes',
       'edit any article content',
     ]);
-  }
 
-  /**
-   * Tests alt and title overriding for embedded images.
-   */
-  public function testAltAndTitle() {
     \Drupal::service('file_system')->copy($this->root . '/core/misc/druplicon.png', 'public://example.jpg');
     /** @var \Drupal\file\FileInterface $file */
-    $file = File::create([
+    $this->file = File::create([
       'uri' => 'public://example.jpg',
       'uid' => $this->adminUser->id(),
     ]);
-    $file->save();
+    $this->file->save();
 
     $this->createNode([
       'type' => 'article',
       'title' => 'Red-lipped batfish',
     ]);
 
-    $media = Media::create([
+    $this->media = Media::create([
       'bundle' => 'image',
       'name' => 'Screaming hairy armadillo',
       'field_media_image' => [
         [
-          'target_id' => $file->id(),
+          'target_id' => $this->file->id(),
           'alt' => 'default alt',
           'title' => 'default title',
         ],
       ],
     ]);
-    $media->save();
+    $this->media->save();
 
-    $host = $this->createNode([
+    $this->host = $this->createNode([
       'type' => 'article',
       'title' => 'Animals with strange names',
       'body' => [
@@ -77,16 +94,20 @@ class MediaImageTest extends EntityEmbedTestBase {
         'format' => 'full_html',
       ],
     ]);
+  }
+
+  /**
+   * Tests alt and title overriding for embedded images.
+   */
+  public function testAltAndTitle() {
 
     $this->drupalLogin($this->adminUser);
-    $this->drupalGet('node/' . $host->id() . '/edit');
+    $this->drupalGet('node/' . $this->host->id() . '/edit');
     $this->waitForEditor();
 
     $this->assignNameToCkeditorIframe();
 
-    $this->assertSession()
-      ->waitForElementVisible('css', 'a.cke_button__test_node')
-      ->click();
+    $this->pressEditorButton('test_node');
     $this->assertSession()->waitForId('drupal-modal');
 
     // Test that node embed doesn't display alt and title fields.
@@ -128,9 +149,7 @@ class MediaImageTest extends EntityEmbedTestBase {
     $this->assertSession()->elementExists('css', '.ui-dialog-titlebar-close')->press();
 
     // Now test with media.
-    $this->assertSession()
-      ->waitForElementVisible('css', 'a.cke_button__test_media_entity_embed')
-      ->click();
+    $this->pressEditorButton('test_media_entity_embed');
     $this->assertSession()->waitForId('drupal-modal');
 
     $this->assertSession()
@@ -176,10 +195,10 @@ class MediaImageTest extends EntityEmbedTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $alt = $this->assertSession()
       ->fieldExists('attributes[data-entity-embed-display-settings][alt]');
-    $this->assertEquals($media->field_media_image->alt, $alt->getValue());
+    $this->assertEquals($this->media->field_media_image->alt, $alt->getValue());
     $title = $this->assertSession()
       ->fieldExists('attributes[data-entity-embed-display-settings][title]');
-    $this->assertEquals($media->field_media_image->title, $title->getValue());
+    $this->assertEquals($this->media->field_media_image->title, $title->getValue());
 
     $this->submitDialog();
 
@@ -407,19 +426,226 @@ class MediaImageTest extends EntityEmbedTestBase {
   }
 
   /**
-   * Helper function to reopen EntityEmbedDialog for first embed.
+   * Tests caption editing in the CKEditor widget.
    */
-  protected function reopenDialog() {
-    $this->getSession()->switchToIFrame();
-    $select_and_edit_embed = <<<JS
-var editor = CKEDITOR.instances['edit-body-0-value'];
-var entityEmbed = editor.widgets.getByElement(editor.editable().findOne('div'));
-entityEmbed.focus();
-editor.execCommand('editdrupalentity');
-JS;
-    $this->getSession()->executeScript($select_and_edit_embed);
+  public function testCkeditorWidgetHasEditableCaption() {
+    $this->drupalLogin($this->adminUser);
+    $this->drupalGet('node/' . $this->host->id() . '/edit');
+    $this->waitForEditor();
+    $this->assignNameToCkeditorIframe();
+    $this->pressEditorButton('test_media_entity_embed');
+    $this->assertSession()->waitForId('drupal-modal');
+
+    // Embed media.
+    $this->assertSession()
+      ->fieldExists('entity_id')
+      ->setValue('Screaming hairy armadillo (1)');
+    $this->assertSession()
+      ->elementExists('css', 'button.js-button-next')
+      ->click();
+    $this->assertSession()
+      ->waitForElementVisible('css', 'form.entity-embed-dialog-step--embed');
+    $this->assertSession()
+      ->selectExists('attributes[data-entity-embed-display]')
+      ->setValue('entity_reference:media_thumbnail');
     $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->waitForElementVisible('css', 'form.entity-embed-dialog-step--embed');
+    $this->assertSession()
+      ->fieldExists('attributes[data-caption]')
+      ->setValue('Is this the real life? Is this just fantasy?');
+    $this->submitDialog();
+
+    // Assert that the embedded media was upcasted to a CKEditor widget.
+    $figcaption = $this->assertSession()
+      ->elementExists('css', 'figcaption');
+    $this->assertTrue($figcaption->hasAttribute('contenteditable'));
+
+    // Type in the widget's editable for the caption.
+    $this->setCaption('Caught in a <strong>landslide</strong>! No escape from <em>reality</em>!');
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->elementExists('xpath', '//figcaption//em');
+    $this->assertSession()
+      ->elementExists('xpath', '//figcaption//strong')
+      ->click();
+
+    // Select the <strong> element and unbold it.
+    $this->clickPathLinkByTitleAttribute("strong element");
+    $this->pressEditorButton('bold');
+    $this->getSession()->switchToIFrame('ckeditor');
+    $figcaption = $this->assertSession()
+      ->elementExists('xpath', '//figcaption');
+    $this->assertTrue($figcaption->has('css', 'em'));
+    $this->assertFalse($figcaption->has('css', 'strong'));
+
+    // Select the <em> element and unitalicize it.
+    $this->assertSession()->elementExists('xpath', '//figcaption//em')->click();
+    $this->clickPathLinkByTitleAttribute("em element");
+    $this->pressEditorButton('italic');
+
+    // The "source" button should reveal the HTML source in a state matching
+    // what is shown in the CKEditor widget.
+    $this->pressEditorButton('source');
+    $source = $this->assertSession()
+      ->elementExists('xpath', "//textarea[contains(@class, 'cke_source')]");
+    $value = $source->getValue();
+    $dom = Html::load($value);
+    $xpath = new \DOMXPath($dom);
+    $drupal_entity = $xpath->query('//drupal-entity')[0];
+    $this->assertEquals('Caught in a landslide! No escape from reality!', $drupal_entity->getAttribute('data-caption'));
+
+    // Change the caption by modifying the HTML source directly. When exiting
+    // "source" mode, this should be respected. Note that there is a <strong>
+    // tag and it must be HTML-encoded.
+    $poor_boy_text = "I'm just a <strong>poor boy</strong>, I need no sympathy!";
+    $drupal_entity->setAttribute("data-caption", htmlentities($poor_boy_text));
+    $source->setValue(Html::serialize($dom));
+    $this->pressEditorButton('source');
+    $this->assignNameToCkeditorIframe();
+    $this->getSession()->switchToIFrame('ckeditor');
+    $figcaption = $this->assertSession()->waitForElement('css', 'figcaption');
+    $this->assertEquals($poor_boy_text, $figcaption->getHtml());
+
+    // Select the <strong> element that we just set in "source" mode where we
+    // also had to HTML-encode it. This proves that it was indeed rendered by
+    // the CKEditor widget.
+    $figcaption->find('css', 'strong')->click();
+    $this->pressEditorButton('bold');
+
+    // Insert a link into the caption.
+    $this->clickPathLinkByTitleAttribute("Caption element");
+    $this->pressEditorButton('drupallink');
+    $this->assertSession()->waitForId('drupal-modal');
+    $this->assertSession()
+      ->waitForElementVisible('css', '#editor-link-dialog-form')
+      ->findField('attributes[href]')
+      ->setValue('http://www.drupal.org');
+    $this->assertSession()->elementExists('css', 'button.form-submit')->press();
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    // Save the entity.
+    $this->assertSession()->buttonExists('Save')->press();
+
+    // Verify the saved entity when viewed also contains the captioned media.
+    $link = $this->assertSession()->elementExists('xpath', '//figcaption//a');
+    $this->assertEquals('http://www.drupal.org', $link->getAttribute('href'));
+    $this->assertEquals("I'm just a poor boy, I need no sympathy!", $link->getText());
+
+    // Edit it again, type a different caption in the widget
+    $this->drupalGet('node/' . $this->host->id() . '/edit');
+    $this->waitForEditor();
+    $this->assignNameToCkeditorIframe();
+    $this->getSession()->switchToIFrame('ckeditor');
+    $figcaption = $this->assertSession()
+      ->waitForElementVisible('css', 'figcaption');
+    $this->assertTrue($figcaption->hasAttribute('contenteditable'));
+    $this->setCaption('Scaramouch, <em>Scaramouch</em>, will you do the <strong>Fandango</strong>?');
+
+    // Verify that the element path usefully indicates the specific media type
+    // that is being embedded.
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->elementExists('xpath', '//figcaption//em')->click();
+    $this->getSession()->switchToIFrame();
+    $this->assertSession()
+      ->elementTextContains('css', '#cke_1_path', 'Embedded Media Entity Embed');
+
+    // Test that removing caption in the EntityEmbedDialog form sets the embed
+    // to be captionless.
+    $this->reopenDialog();
+    $this->assertSession()
+      ->fieldExists('attributes[data-caption]')
+      ->setValue('');
+    $this->submitDialog();
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->assertSession()->elementExists('css', 'drupal-entity');
+    $this->assertSession()->elementNotExists('css', 'figcaption');
+
+    // Set a caption again; this time not using the CKEditor Widget, but through
+    // the dialog. We're typing HTML in the form field, but it will have to be
+    // HTML-encoded for it to actually show up properly in the CKEditor Widget.
+    $this->reopenDialog();
+    $freddys_lament = "Mama, life had just begun. But now I've gone and <strong>thrown it all away</strong>! :(";
+    $this->assertSession()
+      ->fieldExists('attributes[data-caption]')
+      ->setValue($freddys_lament);
+    $this->submitDialog();
+
+    // @todo fix https://www.drupal.org/project/entity_embed/issues/3060439 and
+    // uncomment the next line.
+    $this->assertSession()->elementNotExists('css', 'figcaption');
+    //$this->assertSession()->elementExists('css', 'figcaption');
+  }
+
+  /**
+   * Tests linkability of the CKEditor widget.
+   */
+  public function testCkeditorWidgetIsLinkable() {
+    $this->host->body->value = '<drupal-entity data-caption="baz" data-embed-button="test_media_entity_embed" data-entity-embed-display="entity_reference:media_thumbnail" data-entity-embed-display-settings="{&quot;image_style&quot;:&quot;&quot;,&quot;image_link&quot;:&quot;&quot;}" data-entity-type="media" data-entity-uuid="' . $this->media->uuid() . '"></drupal-entity>';
+    $this->host->save();
+
+    $this->drupalLogin($this->adminUser);
+    $this->drupalGet('node/' . $this->host->id() . '/edit');
+    $this->waitForEditor();
+    $this->assignNameToCkeditorIframe();
+    $this->getSession()->switchToIFrame('ckeditor');
+
+    // Select the CKEditor Widget and click the "link" button.
+    $this->assertSession()->elementExists('css', 'drupal-entity')->click();
+    $this->pressEditorButton('drupallink');
+    $this->assertSession()->waitForId('drupal-modal');
+
+    // Enter a link in the link dialog and save.
+    $this->assertSession()
+      ->waitForElementVisible('css', '#editor-link-dialog-form')
+      ->findField('attributes[href]')
+      ->setValue('http://www.drupal.org');
+    $this->assertSession()->elementExists('css', 'button.form-submit')->press();
+    $this->assertSession()->assertWaitOnAjaxRequest();
+
+    // Save the entity.
+    $this->assertSession()->buttonExists('Save')->press();
+
+    // Verify the saved entity when viewed also contains the linked media.
+    $this->assertSession()->elementExists('xpath', '//a[@href="http://www.drupal.org"]//div[@data-embed-button="test_media_entity_embed"]//img');
+  }
+
+  /**
+   * Tests even <drupal-entity> elements whose button is not present are upcast.
+   *
+   * @param string $data_embed_button_attribute
+   *   The HTML for a data-embed-button atttribute.
+   *
+   * @dataProvider providerCkeditorWidgetWorksForAllEmbeds
+   */
+  public function testCkeditorWidgetWorksForAllEmbeds($data_embed_button_attribute) {
+    $this->host->body->value = '<drupal-entity data-caption="baz" ' . $data_embed_button_attribute . ' data-entity-embed-display="entity_reference:media_thumbnail" data-entity-embed-display-settings="{&quot;image_style&quot;:&quot;&quot;,&quot;image_link&quot;:&quot;&quot;}" data-entity-type="media" data-entity-uuid="' . $this->media->uuid() . '"></drupal-entity>';
+    $this->host->save();
+
+    $this->drupalLogin($this->adminUser);
+    $this->drupalGet('node/' . $this->host->id() . '/edit');
+    $this->waitForEditor();
+    $this->assignNameToCkeditorIframe();
+
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertNotNull($this->assertSession()->waitForElementVisible('css', 'figcaption'));
+  }
+
+  /**
+   * Data provider for testCkeditorWidgetWorksForAllEmbeds().
+   */
+  public function providerCkeditorWidgetWorksForAllEmbeds() {
+    return [
+      'present and active CKEditor button ID' => [
+        'data-embed-button="test_media_entity_embed"',
+      ],
+      'present and inactive CKEditor button ID' => [
+        'data-embed-button="user"',
+      ],
+      'present and nonsensical CKEditor button ID' => [
+        'data-embed-button="ceci nest pas une pipe"',
+      ],
+      'absent' => [
+        '',
+      ],
+    ];
   }
 
   /**
@@ -428,10 +654,35 @@ JS;
   protected function submitDialog() {
     $this->assertSession()->elementExists('css', 'button.button--primary')->press();
     $this->assertSession()->assertWaitOnAjaxRequest();
-
-    // Verify that the embedded entity preview in CKEditor displays the image
-    // with the default alt and title.
     $this->getSession()->switchToIFrame('ckeditor');
+  }
+
+  /**
+   * Set the text of the editable caption to the given text.
+   *
+   * @param string $text
+   *   The text to set in the caption.
+   */
+  protected function setCaption($text) {
+    $this->getSession()->switchToIFrame();
+    $select_and_edit_caption = "var editor = CKEDITOR.instances['edit-body-0-value'];
+       var figcaption = editor.widgets.getByElement(editor.editable().findOne('figcaption'));
+       figcaption.editables.caption.setData('" . $text . "')";
+    $this->getSession()->executeScript($select_and_edit_caption);
+  }
+
+  /**
+   * Clicks a link in the editor's path links with the given title text.
+   *
+   * @param string $text
+   *   The title attribute of the link to click.
+   *
+   * @throws \Behat\Mink\Exception\ElementNotFoundException
+   */
+  protected function clickPathLinkByTitleAttribute($text) {
+    $this->getSession()->switchToIFrame();
+    $selector = '//span[@id="cke_1_path"]//a[@title="' . $text . '"]';
+    $this->assertSession()->elementExists('xpath', $selector)->click();
   }
 
 }
