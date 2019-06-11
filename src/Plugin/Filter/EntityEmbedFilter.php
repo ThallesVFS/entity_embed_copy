@@ -178,7 +178,12 @@ class EntityEmbedFilter extends FilterBase implements ContainerFactoryPluginInte
         $this->replaceNodeContent($node, $entity_output);
       }
 
-      $result->setProcessedText(Html::serialize($dom));
+      $result->setProcessedText(Html::serialize($dom))
+        ->addAttachments([
+          'library' => [
+            'entity_embed/caption',
+          ],
+        ]);
     }
 
     return $result;
