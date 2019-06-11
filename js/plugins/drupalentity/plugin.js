@@ -134,10 +134,12 @@
               // Detach the behaviors that were attached when the entity content
               // was inserted.
               Drupal.runEmbedBehaviors('detach', existingElement.$);
+              var hasCaption = false;
               if (values.attributes['data-caption']) {
                 values.attributes['data-caption'] = CKEDITOR.tools.htmlDecodeAttr(values.attributes['data-caption']);
+                hasCaption = true;
               }
-              existingWidget.setData({ attributes: values.attributes });
+              existingWidget.setData({ attributes: values.attributes, hasCaption: hasCaption });
             }
             editor.fire('saveSnapshot');
           };
@@ -169,6 +171,7 @@
             return;
           }
           data.attributes = CKEDITOR.tools.copy(attributes);
+          data.hasCaption = data.attributes.hasOwnProperty('data-caption');
           data.link = null;
           if (element.parent.name === 'a') {
             data.link = CKEDITOR.tools.copy(element.parent.attributes);

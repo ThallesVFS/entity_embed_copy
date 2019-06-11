@@ -567,11 +567,7 @@ class MediaImageTest extends EntityEmbedTestBase {
       ->fieldExists('attributes[data-caption]')
       ->setValue($freddys_lament);
     $this->submitDialog();
-
-    // @todo fix https://www.drupal.org/project/entity_embed/issues/3060439 and
-    // uncomment the next line.
-    $this->assertSession()->elementNotExists('css', 'figcaption');
-    //$this->assertSession()->elementExists('css', 'figcaption');
+    $this->assertSession()->elementExists('css', 'figcaption');
   }
 
   /**
