@@ -529,7 +529,7 @@ class MediaImageTest extends EntityEmbedTestBase {
     $this->assertEquals('http://www.drupal.org', $link->getAttribute('href'));
     $this->assertEquals("I'm just a poor boy, I need no sympathy!", $link->getText());
 
-    // Edit it again, type a different caption in the widget
+    // Edit it again, type a different caption in the widget.
     $this->drupalGet('node/' . $this->host->id() . '/edit');
     $this->waitForEditor();
     $this->assignNameToCkeditorIframe();
