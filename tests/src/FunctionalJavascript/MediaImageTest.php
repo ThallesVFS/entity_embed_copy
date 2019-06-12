@@ -3,6 +3,7 @@
 namespace Drupal\Tests\entity_embed\FunctionalJavascript;
 
 use Drupal\Component\Utility\Html;
+use Drupal\editor\Entity\Editor;
 use Drupal\entity_embed\Plugin\entity_embed\EntityEmbedDisplay\MediaImageDecorator;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\file\Entity\File;
@@ -571,6 +572,29 @@ class MediaImageTest extends EntityEmbedTestBase {
   }
 
   /**
+   * Tests linkability of the CKEditor widget when `drupalimage` is disabled.
+   */
+  public function testCkeditorWidgetIsLinkableWhenDrupalImageIsAbsent() {
+    // Remove the `drupalimage` plugin's `DrupalImage` button.
+    $editor = Editor::load('full_html');
+    $settings = $editor->getSettings();
+    $rows = $settings['toolbar']['rows'];
+    foreach ($rows as $row_key => $row) {
+      foreach ($row as $group_key => $group) {
+        foreach ($group['items'] as $item_key => $item) {
+          if ($item === 'DrupalImage') {
+            unset($settings['toolbar']['rows'][$row_key][$group_key]['items'][$item_key]);
+          }
+        }
+      }
+    }
+    $editor->setSettings($settings);
+    $editor->save();
+
+    $this->testCkeditorWidgetIsLinkable();
+  }
+
+  /**
    * Tests linkability of the CKEditor widget.
    */
   public function testCkeditorWidgetIsLinkable() {
@@ -601,6 +625,18 @@ class MediaImageTest extends EntityEmbedTestBase {
 
     // Verify the saved entity when viewed also contains the linked media.
     $this->assertSession()->elementExists('xpath', '//a[@href="http://www.drupal.org"]//div[@data-embed-button="test_media_entity_embed"]//img');
+
+    // Test that `drupallink` also still works independently.
+    $this->drupalGet('node/' . $this->host->id() . '/edit');
+    $this->waitForEditor();
+    $this->pressEditorButton('drupallink');
+    $this->assertSession()->waitForId('drupal-modal');
+    $this->assertSession()
+      ->waitForElementVisible('css', '#editor-link-dialog-form')
+      ->findField('attributes[href]')
+      ->setValue('http://www.drupal.org');
+    $this->assertSession()->elementExists('css', 'button.form-submit')->press();
+    $this->assertSession()->assertWaitOnAjaxRequest();
   }
 
   /**

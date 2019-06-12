@@ -83,7 +83,7 @@
           return ourFocusedWidget;
         }
         // If drupalimage is loaded, call that next, to not break its link command integration.
-        if (CKEDITOR.plugins.drupalimage) {
+        if (originalGetFocusedWidget) {
           return originalGetFocusedWidget(editor);
         }
         return null;
