@@ -569,6 +569,32 @@ class MediaImageTest extends EntityEmbedTestBase {
       ->setValue($freddys_lament);
     $this->submitDialog();
     $this->assertSession()->elementExists('css', 'figcaption');
+
+    // Change the caption in the dialog to contain a link.
+    $wind_markup = '<a href="http://www.drupal.org">anyway the wind blows</a>';
+    $this->reopenDialog();
+    $this->assertSession()
+      ->fieldExists('attributes[data-caption]')
+      ->setValue($wind_markup);
+    $this->submitDialog();
+
+    // Assert the caption in the CKEditor widget was updated.
+    $figcaption = $this->assertSession()
+      ->waitForElementVisible('css', 'figcaption');
+    $this->assertEquals('anyway the wind blows', $figcaption->getText());
+
+    // Change the text of the link in the caption.
+    $gallileo = '<a href="http://www.drupal.org">Gallileo, figaro, magnifico</a>';
+    $this->reopenDialog();
+    $this->assertSession()
+      ->fieldExists('attributes[data-caption]')
+      ->setValue($gallileo);
+    $this->submitDialog();
+
+    // Assert the caption in the CKEditor widget was updated.
+    $figcaption = $this->assertSession()
+      ->waitForElementVisible('css', 'figcaption');
+    $this->assertEquals('Gallileo, figaro, magnifico', $figcaption->getText());
   }
 
   /**

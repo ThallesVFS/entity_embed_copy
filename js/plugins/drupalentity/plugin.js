@@ -202,7 +202,7 @@
         },
 
         data: function (event) {
-          if (this._previewNeedsUpdate()) {
+          if (this._previewNeedsServersideUpdate()) {
             editor.fire('lockSnapshot');
             this._tearDownDynamicEditables();
 
@@ -210,6 +210,10 @@
               widget._setUpDynamicEditables();
               editor.fire('unlockSnapshot');
             });
+          }
+          else if (this._previewNeedsClientsideUpdate()) {
+            this._performClientsideUpdate();
+            editor.fire('saveSnapshot');
           }
 
           // Track the previous state, to allow for smarter decisions.
@@ -249,13 +253,30 @@
           }
         },
 
-        _previewNeedsUpdate() {
+        _previewNeedsServersideUpdate() {
           // When the widget is first loading, it of course needs to still get a preview!
           if (!this.ready) {
             return true;
           }
 
           return this._hashData(this.oldData) !== this._hashData(this.data);
+        },
+
+        _previewNeedsClientsideUpdate() {
+          if (this.data.hasCaption && this.editables.caption.$.innerHTML !== this.data.attributes['data-caption']) {
+            return true;
+          }
+
+          return false;
+        },
+
+        _performClientsideUpdate() {
+          if (this.data.hasCaption) {
+            this.captionEditableMutationObserver.disconnect();
+            this.editables.caption.$.innerHTML = this.data.attributes['data-caption'];
+            var config = {characterData: true, attributes: false, childList: true, subtree: true};
+            this.captionEditableMutationObserver.observe(this.editables.caption.$, config);
+          }
         },
 
         _hashData(data) {
