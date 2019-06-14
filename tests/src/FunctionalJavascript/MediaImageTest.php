@@ -196,10 +196,10 @@ class MediaImageTest extends EntityEmbedTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $alt = $this->assertSession()
       ->fieldExists('attributes[data-entity-embed-display-settings][alt]');
-    $this->assertEquals($this->media->field_media_image->alt, $alt->getValue());
+    $this->assertEquals($this->media->field_media_image->alt, $alt->getAttribute('placeholder'));
     $title = $this->assertSession()
       ->fieldExists('attributes[data-entity-embed-display-settings][title]');
-    $this->assertEquals($this->media->field_media_image->title, $title->getValue());
+    $this->assertEquals($this->media->field_media_image->title, $title->getAttribute('placeholder'));
 
     $this->submitDialog();
 
@@ -306,13 +306,6 @@ class MediaImageTest extends EntityEmbedTestBase {
       ->set('settings.title_field', FALSE)
       ->save();
 
-    $field = FieldConfig::load('media.image.field_media_image');
-    $settings = $field->getSettings();
-    $settings['alt_field'] = FALSE;
-    $settings['title_field'] = FALSE;
-    $field->set('settings', $settings);
-    $field->save();
-
     drupal_flush_all_caches();
 
     $this->reopenDialog();
@@ -378,41 +371,12 @@ class MediaImageTest extends EntityEmbedTestBase {
     $settings = $field->getSettings();
     $settings['alt_field'] = TRUE;
     $settings['title_field'] = TRUE;
-    $settings['alt_field_required'] = FALSE;
-    $settings['title_field_required'] = TRUE;
     $field->set('settings', $settings);
     $field->save();
 
     drupal_flush_all_caches();
 
     $this->reopenDialog();
-
-    $alt = $this->assertSession()
-      ->fieldExists('attributes[data-entity-embed-display-settings][alt]');
-    $this->assertFalse($alt->hasAttribute('required'));
-    $title = $this->assertSession()
-      ->fieldExists('attributes[data-entity-embed-display-settings][title]');
-    $this->assertTrue($title->hasAttribute('required'));
-
-    $this->submitDialog();
-
-    $field = FieldConfig::load('media.image.field_media_image');
-    $settings = $field->getSettings();
-    $settings['alt_field_required'] = TRUE;
-    $settings['title_field_required'] = FALSE;
-    $field->set('settings', $settings);
-    $field->save();
-
-    drupal_flush_all_caches();
-
-    $this->reopenDialog();
-
-    $alt = $this->assertSession()
-      ->fieldExists('attributes[data-entity-embed-display-settings][alt]');
-    $this->assertTrue($alt->hasAttribute('required'));
-    $title = $this->assertSession()
-      ->fieldExists('attributes[data-entity-embed-display-settings][title]');
-    $this->assertFalse($title->hasAttribute('required'));
 
     // Test that setting value to double quote will allow setting the alt
     // and title to empty.
@@ -424,6 +388,16 @@ class MediaImageTest extends EntityEmbedTestBase {
     $img = $this->assertSession()->elementExists('css', 'img');
     $this->assertEmpty($img->getAttribute('alt'));
     $this->assertEmpty($img->getAttribute('title'));
+
+    $this->reopenDialog();
+
+    // Test that *not* filling out the fields makes it fall back to the default.
+    $alt->setValue('');
+    $title->setValue('');
+    $this->submitDialog();
+    $img = $this->assertSession()->elementExists('css', 'img');
+    $this->assertEquals('default alt', $img->getAttribute('alt'));
+    $this->assertEquals('default title', $img->getAttribute('title'));
   }
 
   /**
