@@ -236,7 +236,7 @@
           if (this.initEditable('caption', this.definition.editables.caption)) {
             // And ensure that any changes made to it are persisted.
             var captionDomNode = this.editables.caption.$;
-            var config = {characterData: true, attributes: false, childList: true, subtree: true};
+            var config = {characterData: true, attributes: true, childList: true, subtree: true};
             var widget = this;
             this.captionEditableMutationObserver = new MutationObserver(function () {
               var entityAttributes = CKEDITOR.tools.clone(widget.data.attributes);

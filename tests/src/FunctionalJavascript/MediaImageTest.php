@@ -496,12 +496,32 @@ class MediaImageTest extends EntityEmbedTestBase {
     $this->assertSession()->elementExists('css', 'button.form-submit')->press();
     $this->assertSession()->assertWaitOnAjaxRequest();
 
+    // Wait for the live preview in the CKEditor widget to finish loading, then
+    // edit the link.
+    $this->getSession()->switchToIFrame('ckeditor');
+    $figcaption = $this->assertSession()->waitForElement('css', 'figcaption');
+    $figcaption->find('css', 'a')->click();
+    $this->clickPathLinkByTitleAttribute("a element");
+    $this->pressEditorButton('drupallink');
+    $this->assertSession()->waitForId('drupal-modal');
+    $this->assertSession()
+      ->waitForElementVisible('css', '#editor-link-dialog-form')
+      ->findField('attributes[href]')
+      ->setValue('https://www.drupal.org/project/entity_embed');
+    $this->assertSession()->elementExists('css', 'button.form-submit')->press();
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $this->pressEditorButton('source');
+    $source = $this->assertSession()
+      ->elementExists('xpath', "//textarea[contains(@class, 'cke_source')]");
+    $value = $source->getValue();
+    $this->assertContains('https://www.drupal.org/project/entity_embed', $value);
+
     // Save the entity.
     $this->assertSession()->buttonExists('Save')->press();
 
     // Verify the saved entity when viewed also contains the captioned media.
     $link = $this->assertSession()->elementExists('xpath', '//figcaption//a');
-    $this->assertEquals('http://www.drupal.org', $link->getAttribute('href'));
+    $this->assertEquals('https://www.drupal.org/project/entity_embed', $link->getAttribute('href'));
     $this->assertEquals("I'm just a poor boy, I need no sympathy!", $link->getText());
 
     // Edit it again, type a different caption in the widget.
