@@ -235,15 +235,15 @@
           // Now that the caption is available in the DOM, make it editable.
           if (this.initEditable('caption', this.definition.editables.caption)) {
             // And ensure that any changes made to it are persisted.
-            var captionDomNode = this.editables.caption.$;
+            var captionEditable = this.editables.caption;
             var config = {characterData: true, attributes: true, childList: true, subtree: true};
             var widget = this;
             this.captionEditableMutationObserver = new MutationObserver(function () {
               var entityAttributes = CKEDITOR.tools.clone(widget.data.attributes);
-              entityAttributes['data-caption'] = captionDomNode.innerHTML;
+              entityAttributes['data-caption'] = captionEditable.getData();
               widget.setData('attributes', entityAttributes);
             });
-            this.captionEditableMutationObserver.observe(captionDomNode, config);
+            this.captionEditableMutationObserver.observe(captionEditable.$, config);
           }
         },
 
@@ -263,7 +263,7 @@
         },
 
         _previewNeedsClientsideUpdate() {
-          if (this.data.hasCaption && this.editables.caption.$.innerHTML !== this.data.attributes['data-caption']) {
+          if (this.data.hasCaption && this.editables.caption.getData() !== this.data.attributes['data-caption']) {
             return true;
           }
 

@@ -497,7 +497,7 @@ class MediaImageTest extends EntityEmbedTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
 
     // Wait for the live preview in the CKEditor widget to finish loading, then
-    // edit the link.
+    // edit the link; no `data-cke-saved-href` attribute should exist on it.
     $this->getSession()->switchToIFrame('ckeditor');
     $figcaption = $this->assertSession()->waitForElement('css', 'figcaption');
     $figcaption->find('css', 'a')->click();
@@ -515,6 +515,7 @@ class MediaImageTest extends EntityEmbedTestBase {
       ->elementExists('xpath', "//textarea[contains(@class, 'cke_source')]");
     $value = $source->getValue();
     $this->assertContains('https://www.drupal.org/project/entity_embed', $value);
+    $this->assertNotContains('data-cke-saved-href', $value);
 
     // Save the entity.
     $this->assertSession()->buttonExists('Save')->press();
