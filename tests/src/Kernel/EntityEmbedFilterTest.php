@@ -296,6 +296,28 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
   }
 
   /**
+   * Tests recursive rendering protection.
+   */
+  public function testRecursionProtection() {
+    $text = $this->createEmbedCode([
+      'data-entity-type' => 'node',
+      'data-entity-uuid' => static::EMBEDDED_ENTITY_UUID,
+      'data-view-mode' => 'default',
+    ]);
+
+    // Render and verify the presence of the embedded entity 20 times.
+    for ($i = 0; $i < 20; $i++) {
+      $this->applyFilter($text);
+      $this->assertCount(1, $this->cssSelect('div.embedded-entity > [data-entity-embed-test-view-mode="default"]'));
+    }
+
+    // Render a 21st time, this is exceeding the recursion limit. The entity
+    // embed markup will be stripped.
+    $this->applyFilter($text);
+    $this->assertEmpty($this->getRawContent());
+  }
+
+  /**
    * @covers \Drupal\filter\Plugin\Filter\FilterAlign
    * @covers \Drupal\filter\Plugin\Filter\FilterCaption
    * @dataProvider providerFilterIntegration
