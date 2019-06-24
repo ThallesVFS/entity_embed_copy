@@ -170,7 +170,7 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
    *
    * @dataProvider providerAccessUnpublished
    */
-  public function testAccessUnpublished($allowed_to_view_unpublished, $expected_rendered, CacheableMetadata $expected_cacheability) {
+  public function testAccessUnpublished($allowed_to_view_unpublished, $expected_rendered, CacheableMetadata $expected_cacheability, array $expected_attachments) {
     // Unpublish the embedded entity so we can test variations in behavior.
     $this->embeddedEntity->setUnpublished()->save();
 
@@ -198,8 +198,7 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
     $this->assertSame($result->getCacheTags(), $expected_cacheability->getCacheTags());
     $this->assertSame($result->getCacheContexts(), $expected_cacheability->getCacheContexts());
     $this->assertSame($result->getCacheMaxAge(), $expected_cacheability->getCacheMaxAge());
-    $this->assertSame(['library'], array_keys($result->getAttachments()));
-    $this->assertSame(['entity_embed/caption'], $result->getAttachments()['library']);
+    $this->assertSame($expected_attachments, $result->getAttachments());
   }
 
   /**
@@ -214,6 +213,7 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
           ->setCacheTags(['foo:1', 'node:1'])
           ->setCacheContexts(['user.permissions'])
           ->setCacheMaxAge(Cache::PERMANENT),
+        [],
       ],
       'user can access embedded entity' => [
         TRUE,
@@ -229,6 +229,7 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
           ])
           ->setCacheContexts(['timezone', 'user', 'user.permissions'])
           ->setCacheMaxAge(Cache::PERMANENT),
+        ['library' => ['entity_embed/caption']],
       ],
     ];
   }
