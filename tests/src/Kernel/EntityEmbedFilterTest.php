@@ -238,9 +238,9 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
    *
    * @dataProvider providerMissingEntityIndicator
    */
-  public function testMissingEntityIndicator($uuid) {
+  public function testMissingEntityIndicator($entity_type_id, $uuid, $expected_missing_text) {
     $content = $this->createEmbedCode([
-      'data-entity-type' => 'node',
+      'data-entity-type' => $entity_type_id,
       'data-entity-uuid' => $uuid,
       'data-view-mode' => 'default',
     ]);
@@ -259,9 +259,9 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
     $deleted_embed_warning = $this->cssSelect('img')[0];
     $this->assertNotEmpty($deleted_embed_warning);
     $this->assertHasAttributes($deleted_embed_warning, [
-      'alt' => 'Deleted content encountered, site owner alerted.',
+      'alt' => $expected_missing_text,
       'src' => file_create_url('core/modules/media/images/icons/no-thumbnail.png'),
-      'title' => 'Deleted content.',
+      'title' => $expected_missing_text,
     ]);
   }
 
@@ -270,11 +270,20 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
    */
   public function providerMissingEntityIndicator() {
     return [
-      'valid UUID but for a deleted entity' => [
+      'node; valid UUID but for a deleted entity' => [
+        'node',
         static::EMBEDDED_ENTITY_UUID,
+        'Missing content.',
       ],
-      'invalid UUID' => [
+      'node; invalid UUID' => [
+        'node',
         'invalidUUID',
+        'Missing content.',
+      ],
+      'user; invalid UUID' => [
+        'user',
+        'invalidUUID',
+        'Missing user.',
       ],
     ];
   }
