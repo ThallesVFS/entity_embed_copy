@@ -215,6 +215,9 @@
             editor.fire('saveSnapshot');
           }
 
+          // Allow entity_embed.editor.css to respond to changes (for example in alignment).
+          this.element.setAttributes(this.data.attributes);
+
           // Track the previous state, to allow for smarter decisions.
           this.oldData = CKEDITOR.tools.clone(this.data);
         },
