@@ -3,7 +3,7 @@
  * Drupal Entity embed plugin.
  */
 
-(function ($, Drupal, CKEDITOR) {
+(function (Drupal, CKEDITOR) {
 
   "use strict";
 
@@ -305,9 +305,7 @@
         _loadPreview: function (callback) {
           var widget = this;
           var previewLoaderAjax = Drupal.ajax({
-            url: Drupal.url('embed/preview/' + editor.config.drupal.format + '?' + $.param({
-              value: this.downcast().getOuterHtml()
-            })),
+            url: Drupal.url('embed/preview/' + editor.config.drupal.format + '?value=' + encodeURIComponent(this.downcast().getOuterHtml())),
             progress: { type: 'none' },
           });
           // Implement a scoped embed_insert AJAX command: calls the callback.
@@ -416,7 +414,7 @@
       return false;
     }
 
-    var button = $(element.$.firstChild).attr('data-embed-button');
+    var button = element.$.firstChild.getAttribute('data-embed-button');
     if (!button) {
       // If there was no data-embed-button attribute, not editable.
       return false;
@@ -426,4 +424,4 @@
     return editor.config.DrupalEntity_buttons.hasOwnProperty(button);
   }
 
-})(jQuery, Drupal, CKEDITOR);
+})(Drupal, CKEDITOR);
