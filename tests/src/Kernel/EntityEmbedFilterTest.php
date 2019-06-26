@@ -195,9 +195,9 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
     }
 
     // Expected bubbleable metadata.
-    $this->assertSame($result->getCacheTags(), $expected_cacheability->getCacheTags());
-    $this->assertSame($result->getCacheContexts(), $expected_cacheability->getCacheContexts());
-    $this->assertSame($result->getCacheMaxAge(), $expected_cacheability->getCacheMaxAge());
+    $this->assertSame($expected_cacheability->getCacheTags(), $result->getCacheTags());
+    $this->assertSame($expected_cacheability->getCacheContexts(), $result->getCacheContexts());
+    $this->assertSame($expected_cacheability->getCacheMaxAge(), $result->getCacheMaxAge());
     $this->assertSame($expected_attachments, $result->getAttachments());
   }
 
@@ -332,12 +332,13 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
    * @covers \Drupal\filter\Plugin\Filter\FilterCaption
    * @dataProvider providerFilterIntegration
    */
-  public function testFilterIntegration(array $filter_ids, array $additional_attributes, $verification_selector, $expected_verification_success, array $expected_asset_libraries) {
+  public function testFilterIntegration(array $filter_ids, array $additional_attributes, $verification_selector, $expected_verification_success, array $expected_asset_libraries, $prefix = '', $suffix = '') {
     $content = $this->createEmbedCode([
       'data-entity-type' => 'node',
       'data-entity-uuid' => static::EMBEDDED_ENTITY_UUID,
       'data-view-mode' => 'teaser',
     ] + $additional_attributes);
+    $content = $prefix . $content . $suffix;
 
     $result = $this->processText($content, 'en', $filter_ids);
     $this->setRawContent($result->getProcessedText());
@@ -371,7 +372,7 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
     $default_asset_libraries = ['entity_embed/caption'];
 
     $caption_additional_attributes = ['data-caption' => 'Yo.'];
-    $caption_verification_selector = 'figure figcaption';
+    $caption_verification_selector = 'figure > figcaption';
     $caption_test_cases = [
       '`data-caption`; only `entity_embed` ⇒ caption absent' => [
         ['entity_embed'],
@@ -387,10 +388,19 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
         TRUE,
         ['filter/caption', 'entity_embed/caption'],
       ],
+      '`<a>` + `data-caption`; `filter_caption` + `entity_embed` ⇒ caption present, link preserved' => [
+        ['filter_caption', 'entity_embed'],
+        $caption_additional_attributes,
+        'figure > a[href="https://www.drupal.org"] + figcaption',
+        TRUE,
+        ['filter/caption', 'entity_embed/caption'],
+        '<a href="https://www.drupal.org">',
+        '</a>',
+      ],
     ];
 
     $align_additional_attributes = ['data-align' => 'center'];
-    $align_verification_selector = 'drupal-entity.align-center';
+    $align_verification_selector = 'div.embedded-entity.align-center';
     $align_test_cases = [
       '`data-align`; `entity_embed` ⇒ alignment absent' => [
         ['entity_embed'],
@@ -403,8 +413,17 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
         ['filter_align', 'entity_embed'],
         $align_additional_attributes,
         $align_verification_selector,
-        FALSE,
+        TRUE,
         $default_asset_libraries,
+      ],
+      '`<a>` + `data-align`; `filter_align` + `entity_embed` ⇒ alignment present, link preserved' => [
+        ['filter_align', 'entity_embed'],
+        $align_additional_attributes,
+        'a[href="https://www.drupal.org"] > div.embedded-entity.align-center',
+        TRUE,
+        $default_asset_libraries,
+        '<a href="https://www.drupal.org">',
+        '</a>',
       ],
     ];
 
@@ -412,9 +431,18 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
       '`data-caption` + `data-align`; `filter_align` + `filter_caption` + `entity_embed` ⇒ aligned caption present' => [
         ['filter_align', 'filter_caption', 'entity_embed'],
         $align_additional_attributes + $caption_additional_attributes,
-        'figure.align-center figcaption',
+        'figure.align-center > figcaption',
         TRUE,
         ['filter/caption', 'entity_embed/caption'],
+      ],
+      '`<a>` + `data-caption` + `data-align`; `filter_align` + `filter_caption` + `entity_embed` ⇒ aligned caption present, link preserved' => [
+        ['filter_align', 'filter_caption', 'entity_embed'],
+        $align_additional_attributes + $caption_additional_attributes,
+        'figure.align-center > a[href="https://www.drupal.org"] + figcaption',
+        TRUE,
+        ['filter/caption', 'entity_embed/caption'],
+        '<a href="https://www.drupal.org">',
+        '</a>',
       ],
     ];
 

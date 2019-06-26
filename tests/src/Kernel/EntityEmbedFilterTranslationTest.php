@@ -80,7 +80,7 @@ class EntityEmbedFilterTranslationTest extends EntityEmbedFilterTestBase {
       $match_or_fallback_langcode = in_array($text_langcode, $embedded_entity_translation_languages)
         ? $text_langcode
         : 'en';
-      yield "text_langcode=$text_langcode (✅) ⇒ $text_langcode" => [
+      yield "text_langcode=$text_langcode (✅) ⇒ $match_or_fallback_langcode" => [
         $text_langcode,
         [],
         $match_or_fallback_langcode,

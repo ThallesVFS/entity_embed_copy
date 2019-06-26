@@ -246,23 +246,12 @@ class MediaImageDecorator implements EntityEmbedDisplayInterface {
       return NULL;
     }
 
-    try {
-      $field_definition = $entity->getSource()
-        ->getSourceFieldDefinition($entity->bundle->entity);
-      $field_name = $field_definition->getName();
-      $field = $entity->get($field_name);
-      $item = $field->first();
-      if (!empty($item) && $item instanceof ImageItem) {
-        // Check that either alt field or title field is enabled.
-        if ($field_definition->getSetting('alt_field') || $field_definition->getSetting('title_field')) {
-          return $field_name;
-        }
-      }
+    $field_definition = $entity->getSource()
+      ->getSourceFieldDefinition($entity->bundle->entity);
+    $item_class = $field_definition->getItemDefinition()->getClass();
+    if ($item_class == ImageItem::class || is_subclass_of($item_class, ImageItem::class)) {
+      return $field_definition->getName();
     }
-    catch (\Exception $e) {
-      return NULL;
-    }
-
     return NULL;
   }
 
