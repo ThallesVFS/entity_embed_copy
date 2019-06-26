@@ -291,6 +291,8 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
 
   /**
    * Tests that only <drupal-entity> tags are processed.
+   *
+   * @see \Drupal\Tests\entity_embed\FunctionalJavascript\MediaImageTest::testOnlyDrupalEntityTagProcessed()
    */
   public function testOnlyDrupalEntityTagProcessed() {
     $content = $this->createEmbedCode([

@@ -69,7 +69,6 @@
       dtd['a']['drupal-entity'] = 1;
 
       // drupallink has a hardcoded integration with drupalimage. Work around that, to reuse the same integration.
-
       var originalGetFocusedWidget = null;
       if (CKEDITOR.plugins.drupalimage) {
         originalGetFocusedWidget = CKEDITOR.plugins.drupalimage.getFocusedWidget;
@@ -167,7 +166,7 @@
 
         upcast: function (element, data) {
           var attributes = element.attributes;
-          if (attributes['data-entity-type'] === undefined || (attributes['data-entity-id'] === undefined && attributes['data-entity-uuid'] === undefined) || (attributes['data-view-mode'] === undefined && attributes['data-entity-embed-display'] === undefined)) {
+          if (element.name !== 'drupal-entity' || attributes['data-entity-type'] === undefined || (attributes['data-entity-id'] === undefined && attributes['data-entity-uuid'] === undefined) || (attributes['data-view-mode'] === undefined && attributes['data-entity-embed-display'] === undefined)) {
             return;
           }
           data.attributes = CKEDITOR.tools.copy(attributes);

@@ -661,6 +661,37 @@ class MediaImageTest extends EntityEmbedTestBase {
   }
 
   /**
+   * Tests that only <drupal-entity> tags are processed.
+   *
+   * @see \Drupal\Tests\entity_embed\Kernel\EntityEmbedFilterTest::testOnlyDrupalEntityTagProcessed()
+   */
+  public function testOnlyDrupalEntityTagProcessed() {
+    $embed_code = '<drupal-entity data-caption="baz" data-embed-button="test_media_entity_embed" data-entity-embed-display="entity_reference:media_thumbnail" data-entity-embed-display-settings="{&quot;image_style&quot;:&quot;&quot;,&quot;image_link&quot;:&quot;&quot;}" data-entity-type="media" data-entity-uuid="' . $this->media->uuid() . '"></drupal-entity>';
+    $this->host->body->value = str_replace('drupal-entity', 'p', $embed_code);
+    $this->host->save();
+
+    // Assert that `<p data-* …>` is not upcast into a CKEditor Widget.
+    $this->drupalLogin($this->adminUser);
+    $this->drupalGet($this->host->toUrl('edit-form'));
+    $this->waitForEditor();
+    $this->assignNameToCkeditorIframe();
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->waitForElementVisible('css', 'img[src$="example.jpg"]', 1000);
+    $this->assertSession()->elementNotExists('css', 'figure');
+
+    $this->host->body->value = $embed_code;
+    $this->host->save();
+
+    // Assert that `<drupal-entity data-* …>` is upcast into a CKEditor Widget.
+    $this->getSession()->reload();
+    $this->waitForEditor();
+    $this->assignNameToCkeditorIframe();
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->waitForElementVisible('css', 'img[src$="example.jpg"]');
+    $this->assertSession()->elementExists('css', 'figure');
+  }
+
+  /**
    * Tests even <drupal-entity> elements whose button is not present are upcast.
    *
    * @param string $data_embed_button_attribute
