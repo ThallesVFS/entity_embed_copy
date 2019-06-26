@@ -213,14 +213,6 @@ class EntityEmbedFilter extends FilterBase implements ContainerFactoryPluginInte
             });
             $result = $result->merge(BubbleableMetadata::createFromRenderArray($build));
           }
-
-          if (!empty($entity_output)) {
-            $result = $result->addAttachments([
-              'library' => [
-                'entity_embed/caption',
-              ],
-            ]);
-          }
         }
 
         $this->replaceNodeContent($node, $entity_output);

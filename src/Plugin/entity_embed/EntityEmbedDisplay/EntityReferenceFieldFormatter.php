@@ -155,6 +155,9 @@ class EntityReferenceFieldFormatter extends FieldFormatterEntityEmbedDisplayBase
     // - Quick Edit does not make sense for embedded entities; we only allow the
     //   host entity to be edited in-place.
     $build['#pre_render'][] = static::class . '::disableQuickEdit';
+    // - default styling may break captioned media embeds; attach asset library
+    //   to ensure captions behave as intended.
+    $build['#attached']['library'][] = 'entity_embed/caption';
 
     return $build;
   }
