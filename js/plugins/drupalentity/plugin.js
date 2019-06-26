@@ -231,7 +231,7 @@
           return downcastElement;
         },
 
-        _setUpDynamicEditables() {
+        _setUpDynamicEditables: function () {
           // Now that the caption is available in the DOM, make it editable.
           if (this.initEditable('caption', this.definition.editables.caption)) {
             // And ensure that any changes made to it are persisted.
@@ -247,13 +247,13 @@
           }
         },
 
-        _tearDownDynamicEditables() {
+        _tearDownDynamicEditables: function () {
           if (this.captionEditableMutationObserver) {
             this.captionEditableMutationObserver.disconnect();
           }
         },
 
-        _previewNeedsServersideUpdate() {
+        _previewNeedsServersideUpdate: function () {
           // When the widget is first loading, it of course needs to still get a preview!
           if (!this.ready) {
             return true;
@@ -262,7 +262,7 @@
           return this._hashData(this.oldData) !== this._hashData(this.data);
         },
 
-        _previewNeedsClientsideUpdate() {
+        _previewNeedsClientsideUpdate: function () {
           if (this.data.hasCaption && this.editables.caption.getData() !== this.data.attributes['data-caption']) {
             return true;
           }
@@ -270,7 +270,7 @@
           return false;
         },
 
-        _performClientsideUpdate() {
+        _performClientsideUpdate: function () {
           if (this.data.hasCaption) {
             this.captionEditableMutationObserver.disconnect();
             this.editables.caption.$.innerHTML = this.data.attributes['data-caption'];
@@ -279,7 +279,7 @@
           }
         },
 
-        _hashData(data) {
+        _hashData: function (data) {
           var dataToHash = CKEDITOR.tools.clone(data);
           if (dataToHash.attributes['data-caption']) {
             delete dataToHash.attributes['data-caption'];
@@ -302,7 +302,7 @@
          * @param {function} callback
          *   A callback function that will be called after the preview has loaded, and receives the widget instance.
          */
-        _loadPreview(callback) {
+        _loadPreview: function (callback) {
           var widget = this;
           var previewLoaderAjax = Drupal.ajax({
             url: Drupal.url('embed/preview/' + editor.config.drupal.format + '?' + $.param({
