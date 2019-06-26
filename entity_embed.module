@@ -284,11 +284,3 @@ function entity_embed_field_widget_form_alter(&$element, FormStateInterface $for
     }
   }
 }
-
-/**
- * Implements hook_ckeditor_css_alter().
- */
-function entity_embed_ckeditor_css_alter(array &$css) {
-  $css[] = drupal_get_path('module', 'system') . '/css/components/hidden.module.css';
-  $css[] = drupal_get_path('module', 'entity_embed') . '/css/entity_embed.editor.css';
-}

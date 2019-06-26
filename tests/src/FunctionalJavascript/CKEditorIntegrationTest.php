@@ -183,6 +183,8 @@ class CKEditorIntegrationTest extends EntityEmbedTestBase {
     $this->assertSame(2, $this->getCkeditorUndoSnapshotCount());
     $this->assignNameToCkeditorIframe();
     $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->responseContains('entity_embed.editor.css');
+    $this->assertSession()->responseContains('hidden.module.css');
     $this->assertSession()->pageTextNotContains('Billy Bones');
     $this->pressEditorButton($this->button->id());
     $this->assertSession()->waitForId('drupal-modal');
