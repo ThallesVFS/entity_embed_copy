@@ -590,6 +590,16 @@ class MediaImageTest extends EntityEmbedTestBase {
     $figcaption = $this->assertSession()
       ->waitForElementVisible('css', 'figcaption');
     $this->assertEquals('Gallileo, figaro, magnifico', $figcaption->getText());
+
+    // Erase the caption in the CKEditor Widget, verify the <figcaption> still
+    // exists and contains placeholder text, then type something else.
+    $this->setCaption('');
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->elementContains('css', 'figcaption', '');
+    $this->assertSession()->elementAttributeContains('css', 'figcaption', 'data-placeholder', 'Enter caption here');
+    $this->setCaption('Fin.');
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->elementContains('css', 'figcaption', 'Fin.');
   }
 
   /**

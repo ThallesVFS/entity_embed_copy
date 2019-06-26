@@ -236,8 +236,11 @@
         _setUpDynamicEditables: function () {
           // Now that the caption is available in the DOM, make it editable.
           if (this.initEditable('caption', this.definition.editables.caption)) {
-            // And ensure that any changes made to it are persisted.
             var captionEditable = this.editables.caption;
+            // @see core/modules/filter/css/filter.caption.css
+            // @see ckeditor_ckeditor_css_alter()
+            captionEditable.setAttribute('data-placeholder', Drupal.t('Enter caption here'));
+            // And ensure that any changes made to it are persisted.
             var config = {characterData: true, attributes: true, childList: true, subtree: true};
             var widget = this;
             this.captionEditableMutationObserver = new MutationObserver(function () {
@@ -283,10 +286,10 @@
 
         _hashData: function (data) {
           var dataToHash = CKEDITOR.tools.clone(data);
-          if (dataToHash.attributes['data-caption']) {
+          if (dataToHash.attributes.hasOwnProperty('data-caption')) {
             delete dataToHash.attributes['data-caption'];
           }
-          if (dataToHash.link && dataToHash.link.href) {
+          if (dataToHash.link && dataToHash.link.hasOwnProperty('href')) {
             delete dataToHash.link.href;
           }
           return JSON.stringify(dataToHash);
