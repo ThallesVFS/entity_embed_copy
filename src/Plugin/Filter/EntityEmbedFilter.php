@@ -158,7 +158,7 @@ class EntityEmbedFilter extends FilterBase implements ContainerFactoryPluginInte
           }
           if (!$entity instanceof EntityInterface) {
             $missing_text = $this->t('Missing @type.', ['@type' => $this->entityTypeManager->getDefinition($entity_type)->getLowercaseLabel()]);
-            $entity_output = '<img src="' . file_create_url('core/modules/media/images/icons/no-thumbnail.png') . '" width="180" height="180" alt="' . $missing_text . '" title="' . $missing_text . '"/>';
+            $entity_output = '<img src="' . file_url_transform_relative(file_create_url('core/modules/media/images/icons/no-thumbnail.png')) . '" width="180" height="180" alt="' . $missing_text . '" title="' . $missing_text . '"/>';
             throw new EntityNotFoundException(sprintf('Unable to load embedded %s entity %s.', $entity_type, $id));
           }
         }
