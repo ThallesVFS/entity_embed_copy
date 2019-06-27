@@ -50,16 +50,14 @@
   }
 
   CKEDITOR.plugins.add('drupalentity', {
-    // This plugin requires the Widgets System defined in the 'widget' plugin.
     requires: 'widget',
 
-    // The plugin initialization logic goes inside this method.
     beforeInit: function (editor) {
       // Configure CKEditor DTD for custom drupal-entity element.
       // @see https://www.drupal.org/node/2448449#comment-9717735
       var dtd = CKEDITOR.dtd, tagName;
       dtd['drupal-entity'] = {'#': 1};
-      // Register drupal-entity element as allowed child, in each tag that can
+      // Register drupal-entity element as an allowed child in each tag that can
       // contain a div element.
       for (tagName in dtd) {
         if (dtd[tagName].div) {
@@ -171,10 +169,12 @@
           data.link = null;
           if (element.parent.name === 'a') {
             data.link = CKEDITOR.tools.copy(element.parent.attributes);
-            // @todo Ask CKEditor team how to get rid of this, see CKEDITOR.plugins.link.getLinkAttributes
-            if (data.link['data-cke-saved-href']) {
-              delete data.link['data-cke-saved-href'];
-            }
+            // Omit CKEditor-internal attributes.
+            Object.keys(element.parent.attributes).forEach(function (attrName) {
+              if (attrName.indexOf('data-cke-') !== -1) {
+                delete data.link[attrName];
+              }
+            });
           }
           return element;
         },
@@ -207,6 +207,7 @@
               editor.fire('unlockSnapshot');
             });
           }
+          // @todo Remove in https://www.drupal.org/project/entity_embed/issues/3060397
           else if (this._previewNeedsClientsideUpdate()) {
             this._performClientsideUpdate();
             editor.fire('saveSnapshot');
@@ -219,7 +220,6 @@
           this.oldData = CKEDITOR.tools.clone(this.data);
         },
 
-        // Downcast the element.
         downcast: function () {
           var downcastElement = new CKEDITOR.htmlParser.element('drupal-entity', this.data.attributes);
           if (this.data.link) {
@@ -264,7 +264,10 @@
           return this._hashData(this.oldData) !== this._hashData(this.data);
         },
 
+        // @todo Remove in https://www.drupal.org/project/entity_embed/issues/3060397
         _previewNeedsClientsideUpdate: function () {
+          // The preview's caption must be updated when the caption was edited in EntityEmbedDialog.
+          // @see https://www.drupal.org/project/entity_embed/issues/3060397
           if (this.data.hasCaption && this.editables.caption.getData() !== this.data.attributes['data-caption']) {
             return true;
           }
@@ -272,6 +275,7 @@
           return false;
         },
 
+        // @todo Remove in https://www.drupal.org/project/entity_embed/issues/3060397
         _performClientsideUpdate: function () {
           if (this.data.hasCaption) {
             this.captionEditableMutationObserver.disconnect();
@@ -281,11 +285,16 @@
           }
         },
 
+        /**
+         * Computes a hash of the data that can only be previewed by the server.
+         */
         _hashData: function (data) {
           var dataToHash = CKEDITOR.tools.clone(data);
+          // The caption does not need rendering.
           if (dataToHash.attributes.hasOwnProperty('data-caption')) {
             delete dataToHash.attributes['data-caption'];
           }
+          // Changed link destinations do not affect the visual preview.
           if (dataToHash.link && dataToHash.link.hasOwnProperty('href')) {
             delete dataToHash.link.href;
           }
@@ -293,7 +302,7 @@
         },
 
         /**
-         * Loads an entity embed preview, calls a callback to insert.
+         * Loads an entity embed preview, calls a callback after insertion.
          *
          * @param {function} callback
          *   A callback function that will be called after the preview has loaded, and receives the widget instance.
