@@ -704,7 +704,7 @@ class MediaImageTest extends EntityEmbedTestBase {
   /**
    * The CKEditor Widget must load a preview generated using the default theme.
    */
-  public function testPreviewUsesDefaultTheme() {
+  public function testPreviewUsesDefaultThemeAndIsClientCacheable() {
     // Make the node edit form use the admin theme, like on most Drupal sites.
     $this->config('node.settings')
       ->set('use_admin_theme', TRUE)
@@ -734,6 +734,40 @@ class MediaImageTest extends EntityEmbedTestBase {
     $this->assertSession()->waitForElementVisible('css', 'img[src*="example.jpg"]');
     $element = $this->assertSession()->elementExists('css', '[data-entity-embed-test-active-theme]');
     $this->assertSame('stable', $element->getAttribute('data-entity-embed-test-active-theme'));
+
+    // Assert that the first preview request transfered >2 KB over the wire.
+    // Then toggle source mode on and off. This causes the CKEditor widget to be
+    // destroyed and then reconstructed. Assert that during this reconstruction,
+    // a second request is sent. This second request should have transfered zero
+    // bytes: the browser should have cached the response, thus resulting in a
+    // much better user experience.
+    $this->assertGreaterThan(2048, $this->getLastPreviewRequestTransferSize());
+    $this->pressEditorButton('source');
+    $this->assertSession()->waitForElement('css', 'textarea.cke_source');
+    $this->pressEditorButton('source');
+    $this->assignNameToCkeditorIframe();
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->waitForElementVisible('css', 'img[src*="example.jpg"]');
+    $this->assertSame(0, $this->getLastPreviewRequestTransferSize());
+  }
+
+  /**
+   * Gets the transfer size of the last preview request.
+   */
+  protected function getLastPreviewRequestTransferSize() {
+    $this->getSession()->switchToIFrame();
+    $javascript = <<<JS
+(function(){
+  return window.performance
+    .getEntries()
+    .filter(function (entry) {
+      return entry.initiatorType == 'xmlhttprequest' && entry.name.indexOf('/entity-embed/preview/') !== -1;
+    })
+    .pop()
+    .transferSize;
+})()
+JS;
+    return $this->getSession()->evaluateScript($javascript);
   }
 
   /**

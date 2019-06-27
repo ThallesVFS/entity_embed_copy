@@ -295,25 +295,17 @@
         /**
          * Loads an entity embed preview, calls a callback to insert.
          *
-         * @todo Since previews use the downcasted representation, and `downcast()` relies 100% on `this.data`, and
-         * `_hashData()` knows which changes are immaterial, we should be able to cache preview responses.
-         *
          * @param {function} callback
          *   A callback function that will be called after the preview has loaded, and receives the widget instance.
          */
         _loadPreview: function (callback) {
           var widget = this;
-          jQuery.ajax({
-            url: Drupal.url('embed/preview/' + editor.config.drupal.format + '?value=' + encodeURIComponent(this.downcast().getOuterHtml())),
-            dataType: 'json',
-            success: function (data) {
-              for (var i = 0; i < data.length; i++) {
-                if (data[i].command === 'embed_insert') {
-                  widget.element.setHtml(data[i].data);
-                  callback(widget);
-                }
-              }
-            }
+          jQuery.get({
+            url: Drupal.url('entity-embed/preview/' + editor.config.drupal.format + '?text=' + encodeURIComponent(this.downcast().getOuterHtml())),
+            dataType: 'html',
+          }).done(function(previewHtml) {
+            widget.element.setHtml(previewHtml);
+            callback(widget);
           });
         }
       });
