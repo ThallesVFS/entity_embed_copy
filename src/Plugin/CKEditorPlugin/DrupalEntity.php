@@ -37,6 +37,17 @@ class DrupalEntity extends EmbedCKEditorPluginBase implements CKEditorPluginCssI
   /**
    * {@inheritdoc}
    */
+  public function getLibraries(Editor $editor) {
+    return [
+      'core/jquery',
+      'core/drupal',
+      'core/drupal.ajax',
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getConfig(Editor $editor) {
     return [
       'DrupalEntity_dialogTitleAdd' => t('Insert entity'),

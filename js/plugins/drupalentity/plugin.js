@@ -3,7 +3,7 @@
  * Drupal Entity embed plugin.
  */
 
-(function (Drupal, CKEDITOR) {
+(function (jQuery, Drupal, CKEDITOR) {
 
   "use strict";
 
@@ -130,9 +130,6 @@
               editor.insertHtml(entityElement.getOuterHtml());
             }
             else {
-              // Detach the behaviors that were attached when the entity content
-              // was inserted.
-              Drupal.runEmbedBehaviors('detach', existingElement.$);
               var hasCaption = false;
               if (values.attributes['data-caption']) {
                 values.attributes['data-caption'] = CKEDITOR.tools.htmlDecodeAttr(values.attributes['data-caption']);
@@ -298,9 +295,6 @@
         /**
          * Loads an entity embed preview, calls a callback to insert.
          *
-         * Leverages {@link Drupal.Ajax}' ability to have scoped (per-instance)
-         * command implementations to be able to call a callback.
-         *
          * @todo Since previews use the downcasted representation, and `downcast()` relies 100% on `this.data`, and
          * `_hashData()` knows which changes are immaterial, we should be able to cache preview responses.
          *
@@ -309,20 +303,18 @@
          */
         _loadPreview: function (callback) {
           var widget = this;
-          var previewLoaderAjax = Drupal.ajax({
+          jQuery.ajax({
             url: Drupal.url('embed/preview/' + editor.config.drupal.format + '?value=' + encodeURIComponent(this.downcast().getOuterHtml())),
-            progress: { type: 'none' },
+            dataType: 'json',
+            success: function (data) {
+              for (var i = 0; i < data.length; i++) {
+                if (data[i].command === 'embed_insert') {
+                  widget.element.setHtml(data[i].data);
+                  callback(widget);
+                }
+              }
+            }
           });
-          // Implement a scoped embed_insert AJAX command: calls the callback.
-          previewLoaderAjax.commands.embed_insert = function(ajax, response, status) {
-            // `ajax.element` must be set for `Drupal.AjaxCommands.prototype.embed_insert` to work.
-            ajax.element = widget.element.$;
-            Drupal.AjaxCommands.prototype.embed_insert(ajax, response, status);
-            callback(widget);
-            // Clean up after ourselves: delete the Drupal.ajax instance.
-            Drupal.ajax.instances[ajax.instanceIndex] = null;
-          };
-          previewLoaderAjax.execute();
         }
       });
 
@@ -429,4 +421,4 @@
     return editor.config.DrupalEntity_buttons.hasOwnProperty(button);
   }
 
-})(Drupal, CKEDITOR);
+})(jQuery, Drupal, CKEDITOR);

@@ -702,6 +702,41 @@ class MediaImageTest extends EntityEmbedTestBase {
   }
 
   /**
+   * The CKEditor Widget must load a preview generated using the default theme.
+   */
+  public function testPreviewUsesDefaultTheme() {
+    // Make the node edit form use the admin theme, like on most Drupal sites.
+    $this->config('node.settings')
+      ->set('use_admin_theme', TRUE)
+      ->save();
+    $this->container->get('router.builder')->rebuild();
+
+    // Allow the test user to view the admin theme.
+    $this->adminUser->addRole($this->drupalCreateRole(['view the administration theme']));
+    $this->adminUser->save();
+
+    // Configure a different default and admin theme, like on most Drupal sites.
+    $this->config('system.theme')
+      ->set('default', 'stable')
+      ->set('admin', 'classy')
+      ->save();
+
+    // Assert that when looking at an embedded entity in the CKEditor Widget,
+    // the preview is generated using the default theme, not the admin theme.
+    // @see entity_embed_test_entity_view_alter()
+    $this->host->body->value = '<drupal-entity data-caption="baz" data-embed-button="test_media_entity_embed" data-entity-embed-display="entity_reference:entity_reference_entity_view" data-entity-embed-display-settings="full" data-entity-type="media" data-entity-uuid="' . $this->media->uuid() . '"></drupal-entity>';
+    $this->host->save();
+    $this->drupalLogin($this->adminUser);
+    $this->drupalGet($this->host->toUrl('edit-form'));
+    $this->waitForEditor();
+    $this->assignNameToCkeditorIframe();
+    $this->getSession()->switchToIFrame('ckeditor');
+    $this->assertSession()->waitForElementVisible('css', 'img[src*="example.jpg"]');
+    $element = $this->assertSession()->elementExists('css', '[data-entity-embed-test-active-theme]');
+    $this->assertSame('stable', $element->getAttribute('data-entity-embed-test-active-theme'));
+  }
+
+  /**
    * Tests even <drupal-entity> elements whose button is not present are upcast.
    *
    * @param string $data_embed_button_attribute
