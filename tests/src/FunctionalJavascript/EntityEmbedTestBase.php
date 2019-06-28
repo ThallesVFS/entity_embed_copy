@@ -10,9 +10,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 abstract class EntityEmbedTestBase extends WebDriverTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'entity_embed',
@@ -36,7 +34,7 @@ JS;
   }
 
   /**
-   * Click a CKEditor button.
+   * Clicks a CKEditor button.
    *
    * @param string $name
    *   The name of the button, such as drupalink, source, etc.
