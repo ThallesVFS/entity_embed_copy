@@ -625,7 +625,9 @@ class MediaImageTest extends EntityEmbedTestBase {
     $this->getSession()->switchToIFrame('ckeditor');
 
     // Select the CKEditor Widget and click the "link" button.
-    $this->assertSession()->elementExists('css', 'drupal-entity')->click();
+    $drupal_entity = $this->assertSession()->waitForElementVisible('css', 'drupal-entity');
+    $this->assertNotEmpty($drupal_entity);
+    $drupal_entity->click();
     $this->pressEditorButton('drupallink');
     $this->assertSession()->waitForId('drupal-modal');
 
@@ -745,6 +747,7 @@ class MediaImageTest extends EntityEmbedTestBase {
    * Gets the transfer size of the last preview request.
    *
    * @return int
+   *   The transfer size in octets.
    */
   protected function getLastPreviewRequestTransferSize() {
     $this->getSession()->switchToIFrame();
