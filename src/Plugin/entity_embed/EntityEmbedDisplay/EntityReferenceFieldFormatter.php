@@ -15,6 +15,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Entity Embed Display reusing entity reference field formatters.
  *
+ * @todo Implement \Drupal\Core\Security\TrustedCallbackInterface on this class
+ *   when Drupal 8.8 is the minimum supported version, and before Drupal 9 is
+ *   released.
+ *
  * @see \Drupal\entity_embed\EntityEmbedDisplay\EntityEmbedDisplayInterface
  *
  * @EntityEmbedDisplay(
