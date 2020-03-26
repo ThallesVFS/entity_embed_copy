@@ -8,16 +8,13 @@ use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FormatterPluginManager;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\TypedData\TypedDataManager;
 use Drupal\entity_embed\EntityEmbedDisplay\FieldFormatterEntityEmbedDisplayBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Entity Embed Display reusing entity reference field formatters.
- *
- * @todo Implement \Drupal\Core\Security\TrustedCallbackInterface on this class
- *   when Drupal 8.8 is the minimum supported version, and before Drupal 9 is
- *   released.
  *
  * @see \Drupal\entity_embed\EntityEmbedDisplay\EntityEmbedDisplayInterface
  *
@@ -29,7 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   supports_image_alt_and_title = TRUE
  * )
  */
-class EntityReferenceFieldFormatter extends FieldFormatterEntityEmbedDisplayBase {
+class EntityReferenceFieldFormatter extends FieldFormatterEntityEmbedDisplayBase implements TrustedCallbackInterface {
 
   /**
    * The configuration factory.
@@ -78,6 +75,16 @@ class EntityReferenceFieldFormatter extends FieldFormatterEntityEmbedDisplayBase
       $container->get('language_manager'),
       $container->get('config.factory')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks() {
+    return [
+      'disableContextualLinks',
+      'disableQuickEdit',
+    ];
   }
 
   /**

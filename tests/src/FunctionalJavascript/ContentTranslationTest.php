@@ -129,7 +129,7 @@ class ContentTranslationTest extends EntityEmbedTestBase {
     $this->drupalGet('node/' . $host->id() . '/edit');
     $this->waitForEditor();
     $this->pressEditorButton('test_node');
-    $this->assertTrue($this->assertSession()->waitForElementVisible('css', '#entity-embed-dialog-form'));
+    $this->assertNotEmpty($this->assertSession()->waitForElementVisible('css', '#entity-embed-dialog-form'));
 
     // Assert autocomplete suggestions are in host entity language (en).
     $suggestions = $this->getAutocompleteSuggestions('clar');
@@ -188,7 +188,7 @@ class ContentTranslationTest extends EntityEmbedTestBase {
     $this->drupalGet('/fr/node/' . $host->id() . '/edit');
     $this->waitForEditor();
     $this->pressEditorButton('test_node');
-    $this->assertTrue($this->assertSession()->waitForElementVisible('css', '#entity-embed-dialog-form'));
+    $this->assertNotEmpty($this->assertSession()->waitForElementVisible('css', '#entity-embed-dialog-form'));
 
     // Assert autocomplete suggestions are in host entity language (fr).
     $suggestions = $this->getAutocompleteSuggestions('super');

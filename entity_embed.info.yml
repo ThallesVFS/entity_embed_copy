@@ -1,12 +1,12 @@
 name: Entity Embed
 type: module
 description: 'Allows entities to be embedded using a text editor.'
-core_version_requirement: ^8.7.7 || ^9
+core_version_requirement: ^8.8 || ^9
 package: Filters
 dependencies:
   - drupal:editor
   - embed:embed
   - drupal:filter
-  - drupal:system (>=8.4.0)
+  - drupal:system
 test_dependencies:
   - entity_browser:entity_browser
