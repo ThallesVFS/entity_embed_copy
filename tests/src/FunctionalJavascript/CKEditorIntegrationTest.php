@@ -206,7 +206,7 @@ class CKEditorIntegrationTest extends EntityEmbedTestBase {
     $this->getSession()->switchToIFrame('ckeditor');
     $this->assertSession()->pageTextContains('Billy Bones');
     $this->getSession()->switchToIFrame();
-    $this->assertSame(3, $this->getCkeditorUndoSnapshotCount());
+    $this->assertSame(4, $this->getCkeditorUndoSnapshotCount());
     $this->getSession()
       ->getPage()
       ->find('css', 'input[name="title[0][value]"]')

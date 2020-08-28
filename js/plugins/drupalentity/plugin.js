@@ -215,6 +215,7 @@
             this._loadPreview(function (widget) {
               widget._setUpDynamicEditables();
               editor.fire('unlockSnapshot');
+              editor.fire('saveSnapshot');
             });
           }
           // @todo Remove in https://www.drupal.org/project/entity_embed/issues/3060397
