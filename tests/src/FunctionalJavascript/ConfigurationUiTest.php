@@ -260,6 +260,12 @@ class ConfigurationUiTest extends EntityEmbedTestBase {
         'allowed_html' => "<a href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type='1 A I'> <li> <dl> <dt> <dd> <h2 id='jump-*'> <h3 id> <h4 id> <h5 id> <h6 id> <drupal-entity data-entity-type data-entity-uuid data-entity-embed-display data-entity-embed-display-settings data-align data-embed-button data-langcode>",
         'expected_error_message' => 'The <drupal-entity> tag in the allowed HTML tags is missing the following attributes: data-caption, alt, title.',
       ],
+      'Tests that wildcard for required attributes works' => [
+        'filters[filter_html][status]' => TRUE,
+        'filters[entity_embed][status]' => TRUE,
+        'allowed_html' => "<a href hreflang> <em> <strong> <cite> <blockquote cite> <code> <ul type> <ol start type='1 A I'> <li> <dl> <dt> <dd> <h2 id='jump-*'> <h3 id> <h4 id> <h5 id> <h6 id> <drupal-entity data-* alt title>",
+        'expected_error_message' => FALSE,
+      ],
     ];
   }
 
