@@ -4,6 +4,7 @@ namespace Drupal\Tests\entity_embed\Kernel;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\filter\FilterProcessResult;
 
 /**
  * @coversDefaultClass \Drupal\entity_embed\Plugin\Filter\EntityEmbedFilter
@@ -48,11 +49,23 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
       'node_view',
       'user:2',
       'user_view',
-    ], $result->getCacheTags());
-    $this->assertSame(['timezone', 'user.permissions'], $result->getCacheContexts());
+    ], $this->getCacheTags($result));
+    $this->assertSame(['timezone', 'user.permissions'], $this->getCacheContexts($result));
     $this->assertSame(Cache::PERMANENT, $result->getCacheMaxAge());
     $this->assertSame(['library'], array_keys($result->getAttachments()));
     $this->assertSame(['entity_embed/caption'], $result->getAttachments()['library']);
+  }
+
+  private function getCacheTags(FilterProcessResult $result): array {
+    $cache_tags = $result->getCacheTags();
+    sort($cache_tags);
+    return $cache_tags;
+  }
+
+  private function getCacheContexts(FilterProcessResult $result): array {
+    $cache_contexts = $result->getCacheContexts();
+    sort($cache_contexts);
+    return $cache_contexts;
   }
 
   /**
@@ -195,8 +208,8 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
     }
 
     // Expected bubbleable metadata.
-    $this->assertSame($expected_cacheability->getCacheTags(), $result->getCacheTags());
-    $this->assertSame($expected_cacheability->getCacheContexts(), $result->getCacheContexts());
+    $this->assertSame($expected_cacheability->getCacheTags(), $this->getCacheTags($result));
+    $this->assertSame($expected_cacheability->getCacheContexts(), $this->getCacheContexts($result));
     $this->assertSame($expected_cacheability->getCacheMaxAge(), $result->getCacheMaxAge());
     $this->assertSame($expected_attachments, $result->getAttachments());
   }
@@ -257,9 +270,10 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
     $this->applyFilter($content);
     $this->assertCount(0, $this->cssSelect('div.embedded-entity > [data-entity-embed-test-view-mode="default"]'));
     $this->assertCount(0, $this->cssSelect('div.embedded-entity'));
-    $deleted_embed_warning = $this->cssSelect('img')[0];
+    /** @var \SimpleXMLElement[] $deleted_embed_warning */
+    $deleted_embed_warning = $this->cssSelect('img');
     $this->assertNotEmpty($deleted_embed_warning);
-    $this->assertHasAttributes($deleted_embed_warning, [
+    $this->assertHasAttributes($deleted_embed_warning[0], [
       'alt' => $expected_missing_text,
       'src' => file_url_transform_relative(file_create_url('core/modules/media/images/icons/no-thumbnail.png')),
       'title' => $expected_missing_text,
@@ -360,8 +374,8 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
       'node_view',
       'user:2',
       'user_view',
-    ], $result->getCacheTags());
-    $this->assertSame(['timezone', 'user.permissions'], $result->getCacheContexts());
+    ], $this->getCacheTags($result));
+    $this->assertSame(['timezone', 'user.permissions'], $this->getCacheContexts($result));
     $this->assertSame(Cache::PERMANENT, $result->getCacheMaxAge());
     $this->assertSame(['library'], array_keys($result->getAttachments()));
     $this->assertSame($expected_asset_libraries, $result->getAttachments()['library']);
