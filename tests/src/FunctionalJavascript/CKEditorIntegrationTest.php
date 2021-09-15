@@ -27,6 +27,11 @@ class CKEditorIntegrationTest extends EntityEmbedTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * The test button.
    *
    * @var Drupal\embed\Entity\EmbedButton
