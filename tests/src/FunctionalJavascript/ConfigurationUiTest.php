@@ -25,7 +25,7 @@ class ConfigurationUiTest extends EntityEmbedTestBase {
   /**
    * The test administrative user.
    *
-   * @var \Drupal\user\UserInterface
+   * @var \Drupal\Core\Session\AccountInterface
    */
   protected $adminUser;
 
@@ -119,7 +119,7 @@ class ConfigurationUiTest extends EntityEmbedTestBase {
       // Unfortunately the <drupal-entity> tag is not yet allowed due to
       // https://www.drupal.org/project/drupal/issues/2763075.
       $allowed_html = $this->assertSession()->fieldExists('filters[filter_html][settings][allowed_html]')->getValue();
-      $this->assertStringNotContainsString('drupal-entity', $allowed_html);
+      $this->assertStringContainsString('drupal-entity', $allowed_html);
     }
     elseif (!empty($allowed_html)) {
       $page->fillField('filters[filter_html][settings][allowed_html]', $allowed_html);
@@ -191,7 +191,7 @@ class ConfigurationUiTest extends EntityEmbedTestBase {
     $this->assertSession()->waitForElementVisible('css', $target);
     $this->sortableTo($item, $from, $target);
 
-    if ($allowed_html == 'default' && $entity_embed_status) {
+    if ($allowed_html === 'default' && $entity_embed_status) {
       $allowed_html = $this->assertSession()->fieldExists('filters[filter_html][settings][allowed_html]')->getValue();
       $this->assertStringContainsString('drupal-entity', $allowed_html);
     }
