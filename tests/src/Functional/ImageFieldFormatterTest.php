@@ -64,12 +64,24 @@ class ImageFieldFormatterTest extends EntityEmbedTestBase {
       ->createInstance('image:image', []);
     $display->setContextValue('entity', $this->image);
     $conf_form = $display->buildConfigurationForm($form, $form_state);
-    $expected = [
-      'image_style',
-      'image_link',
-      'alt',
-      'title',
-    ];
+    if (version_compare(\Drupal::VERSION, '9.4', '<')) {
+      $expected = [
+        'image_style',
+        'image_link',
+        'alt',
+        'title',
+      ];
+    }
+    else {
+      // Drupal 9.4+ added a new option to the image formatter settings.
+      $expected = [
+        'image_style',
+        'image_link',
+        'image_loading',
+        'alt',
+        'title',
+      ];
+    }
     $this->assertSame($expected, array_keys($conf_form));
     $this->assertSame('select', $conf_form['image_style']['#type']);
     $this->assertSame('Image style', (string) $conf_form['image_style']['#title']);
