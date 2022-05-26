@@ -761,7 +761,7 @@ class MediaImageTest extends EntityEmbedTestBase {
   return window.performance
     .getEntries()
     .filter(function (entry) {
-      return entry.initiatorType == 'xmlhttprequest' && entry.name.indexOf('/entity-embed/preview/') !== -1;
+      return entry.initiatorType == 'xmlhttprequest' && entry.name.indexOf('/embed/preview/') !== -1;
     })
     .pop()
     .transferSize;
