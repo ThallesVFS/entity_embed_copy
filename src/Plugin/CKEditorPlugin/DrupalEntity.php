@@ -31,18 +31,7 @@ class DrupalEntity extends EmbedCKEditorPluginBase implements CKEditorPluginCssI
    * {@inheritdoc}
    */
   public function getFile() {
-    return drupal_get_path('module', 'entity_embed') . '/js/plugins/drupalentity/plugin.js';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLibraries(Editor $editor) {
-    return [
-      'core/jquery',
-      'core/drupal',
-      'core/drupal.ajax',
-    ];
+    return $this->getModulePath('entity_embed') . '/js/plugins/drupalentity/plugin.js';
   }
 
   /**
@@ -62,9 +51,23 @@ class DrupalEntity extends EmbedCKEditorPluginBase implements CKEditorPluginCssI
    */
   public function getCssFiles(Editor $editor) {
     return [
-      drupal_get_path('module', 'system') . '/css/components/hidden.module.css',
-      drupal_get_path('module', 'entity_embed') . '/css/entity_embed.editor.css',
+      $this->getModulePath('system') . '/css/components/hidden.module.css',
+      $this->getModulePath('entity_embed') . '/css/entity_embed.editor.css',
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Backwards compatible version for Drupal 9.2.
+   */
+  protected function getModulePath(string $module_name): string {
+    // CKEditorPluginBase::getModulePath() was added in Drupal 9.3+.
+    if (is_callable('parent::getModulePath')) {
+      return parent::getModulePath($module_name);
+    }
+
+    return \Drupal::service('extension.list.module')->getPath($module_name);
   }
 
 }
