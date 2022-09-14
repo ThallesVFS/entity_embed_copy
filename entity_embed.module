@@ -5,10 +5,13 @@
  * Framework for allowing entities to be embedded in CKEditor.
  */
 
+use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\embed\Entity\EmbedButton;
 
 /**
  * Implements hook_help().

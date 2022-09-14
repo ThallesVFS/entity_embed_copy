@@ -1,0 +1,19 @@
+entity_embed_drupalentity:
+  ckeditor5:
+    plugins:
+      - drupalentity.EntityEmbed
+  drupal:
+    label: 'Entity Embed'
+    class: Drupal\entity_embed\Plugin\CKEditor5Plugin\DrupalEntity
+    library: entity_embed/entity_embed
+    admin_library: entity_embed/admin.entity_embed
+    # This should be dynamically configured based on embed buttons configuration.
+    # There can be more than one embed button declared.
+    toolbar_items:
+      node:
+        label: 'Node'
+      file:
+        label: 'File'
+    elements:
+      - <drupal-entity>
+      - <drupal-entity data-*>

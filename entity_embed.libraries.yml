@@ -17,3 +17,15 @@ caption:
       css/entity_embed.filter.caption.css: {}
   dependencies:
     - filter/caption
+
+# CKEditor 5
+entity_embed:
+  js:
+    js/build/drupalentity.js: { preprocess: false, minified: true }
+  dependencies:
+    - ckeditor5/ckeditor5
+
+admin.entity_embed:
+  css:
+    theme:
+      css/drupalentity.admin.css: { }
