@@ -10,3 +10,7 @@ services:
   entity_embed.builder:
     class: Drupal\entity_embed\EntityEmbedBuilder
     arguments: ['@module_handler', '@plugin.manager.entity_embed.display']
+  entity_embed.embed_buttonsubscriber:
+    class: Drupal\entity_embed\EventSubscriber\EmbedButtonSubscriber
+    tags:
+      - { name: event_subscriber }
