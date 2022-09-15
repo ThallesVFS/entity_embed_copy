@@ -8,6 +8,7 @@ use Drupal\ckeditor5\Plugin\CKEditor5PluginDefault;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\CsrfTokenGenerator;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\editor\EditorInterface;
 use Drupal\embed\Entity\EmbedButton;
@@ -19,12 +20,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class DrupalEntity extends CKEditor5PluginDefault implements ContainerFactoryPluginInterface {
 
   /**
+   * The CSRF Token generator.
+   *
    * @var \Drupal\Core\Access\CsrfTokenGenerator
    */
-  protected CsrfTokenGenerator $csrfTokenGenerator;
+  protected $csrfTokenGenerator;
 
   /**
-   * Media constructor.
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * DrupalEntity constructor.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -34,15 +44,19 @@ class DrupalEntity extends CKEditor5PluginDefault implements ContainerFactoryPlu
    *   The plugin implementation definition.
    * @param \Drupal\Core\Access\CsrfTokenGenerator $csrf_token_generator
    *   The CSRF Token generator service.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The Entity Type Manager service.
    */
   public function __construct(
     array $configuration,
     string $plugin_id,
     CKEditor5PluginDefinition $plugin_definition,
-    CsrfTokenGenerator $csrf_token_generator
+    CsrfTokenGenerator $csrf_token_generator,
+    EntityTypeManagerInterface $entity_type_manager
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->csrfTokenGenerator = $csrf_token_generator;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -53,20 +67,21 @@ class DrupalEntity extends CKEditor5PluginDefault implements ContainerFactoryPlu
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('csrf_token')
+      $container->get('csrf_token'),
+      $container->get('entity_type.manager')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getDynamicPluginConfig(
-    array $static_plugin_config,
-    EditorInterface $editor
-  ): array {
+  public function getDynamicPluginConfig(array $static_plugin_config, EditorInterface $editor): array {
     // Register embed buttons as individual buttons on admin pages.
     $dynamic_plugin_config = $static_plugin_config;
-    $embed_buttons = EmbedButton::loadMultiple();
+    $embed_buttons = $this
+      ->entityTypeManager
+      ->getStorage('embed_button')
+      ->loadMultiple();
     $buttons = [];
     /** @var \Drupal\embed\EmbedButtonInterface $embed_button */
     foreach ($embed_buttons as $embed_button) {
