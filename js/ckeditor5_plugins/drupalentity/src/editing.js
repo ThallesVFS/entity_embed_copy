@@ -21,6 +21,17 @@ export default class EntityEmbedEditing extends Plugin {
       drupalEntityEmbedDisplay: 'data-entity-embed-display',
       drupalEntityEmbedDisplaySettings: 'data-entity-embed-display-settings',
     };
+    const options = this.editor.config.get('entityEmbed');
+    if (!options) {
+      return;
+    }
+    this.options = options;
+    this.labelError = Drupal.t('Preview failed');
+    this.previewError =`
+      <p>${Drupal.t(
+        'An error occurred while trying to preview the embedded content. Please save your work and reload this page.',
+      )}<p>
+    `;
 
     this._defineSchema();
     this._defineConverters();
@@ -46,30 +57,79 @@ export default class EntityEmbedEditing extends Plugin {
   _defineConverters() {
     const {conversion} = this.editor;
 
-    conversion.for('upcast').elementToElement({
-      model: 'drupalEntity',
-      view: {
-        name: 'drupal-entity',
-      },
-    });
+    conversion
+      .for('upcast')
+      .elementToElement({
+        model: 'drupalEntity',
+        view: {
+          name: 'drupal-entity',
+        },
+      });
 
-    conversion.for('dataDowncast').elementToElement({
-      model: 'drupalEntity',
-      view: {
-        name: 'drupal-entity',
-      },
-    });
+    conversion
+      .for('dataDowncast')
+      .elementToElement({
+        model: 'drupalEntity',
+        view: {
+          name: 'drupal-entity',
+        },
+      });
 
     // Convert the <drupalEntity> model into an editable <drupal-entity> widget.
-    conversion.for('editingDowncast').elementToElement({
-      model: 'drupalEntity',
-      view: (modelElement, { writer: viewWriter }) => {
-        const drupalEntity = viewWriter.createRawElement('drupal-entity', {
-          'data-entity-type': 'node',
-        })
-        return toWidgetEditable(drupalEntity, viewWriter);
-      },
-    });
+    conversion
+      .for('editingDowncast')
+      .elementToElement({
+        model: 'drupalEntity',
+        view: (modelElement, { writer }) => {
+          const container = writer.createContainerElement('figure', {
+            class: 'drupal-entity',
+          });
+          writer.setCustomProperty('drupalEntity', true, container);
+
+          return toWidget(container, writer, {
+            label: Drupal.t('Entity Embed widget'),
+          })
+        },
+      })
+      .add((dispatcher) => {
+        const converter = (event, data, conversionApi) => {
+          const viewWriter = conversionApi.writer;
+          const modelElement = data.item;
+          const container = conversionApi.mapper.toViewElement(data.item);
+
+          // @todo We still need to check for when the preview is loading.
+          let drupalEntity = viewWriter.createEditableElement('div');
+          viewWriter.insert(viewWriter.createPositionAt(container, 0), drupalEntity);
+
+          this._loadPreview(modelElement).then(({ label, preview }) => {
+            if (!drupalEntity) {
+              // Nothing to do if associated preview wrapped no longer exist.
+              return;
+            }
+            // CKEditor 5 doesn't support async view conversion. Therefore, once
+            // the promise is fulfilled, the editing view needs to be modified
+            // manually.
+            this.editor.editing.view.change((writer) => {
+              const drupalEntityPreview = writer.createRawElement(
+                'div',
+                {'aria-label': label},
+                (domElement) => {
+                  domElement.innerHTML = preview;
+                },
+              );
+              // Insert the new preview before the previous preview element to
+              // ensure that the location remains same even if it is wrapped
+              // with another element.
+              writer.insert(writer.createPositionBefore(drupalEntity), drupalEntityPreview);
+              writer.remove(drupalEntity);
+            });
+          });
+        }
+
+        dispatcher.on('attribute:drupalEntityEntityUuid:drupalEntity', converter);
+
+        return dispatcher;
+      });
 
     // Set attributeToAttribute conversion for all supported attributes.
     Object.keys(this.attrs).forEach((modelKey) => {
@@ -88,6 +148,46 @@ export default class EntityEmbedEditing extends Plugin {
       conversion.for('dataDowncast').attributeToAttribute(attributeMapping);
       conversion.for('upcast').attributeToAttribute(attributeMapping);
     });
+  }
+
+  async _loadPreview(modelElement) {
+    const query = {
+      text: this._renderElement(modelElement),
+    };
+
+    const response = await fetch(
+      Drupal.url('embed/preview/' + this.options.format + '?' + new URLSearchParams(query)),
+      {
+        headers: {
+          'X-Drupal-EmbedPreview-CSRF-Token':
+          this.options.previewCsrfToken,
+        },
+      },
+    );
+
+    if (response.ok) {
+      const preview = await response.text();
+      return { preview };
+    }
+
+    return { preview: this.previewError };
+  }
+
+  _renderElement(modelElement) {
+    // Create model document fragment which contains the model element so that
+    // it can be stringified using the dataDowncast.
+    const modelDocumentFragment = this.editor.model.change((writer) => {
+      const modelDocumentFragment = writer.createDocumentFragment();
+      // Create shallow clone of the model element to ensure that the original
+      // model element remains untouched and that the caption is not rendered
+      // into the preview.
+      const clonedModelElement = writer.cloneElement(modelElement, false);
+      writer.append(clonedModelElement, modelDocumentFragment);
+
+      return modelDocumentFragment;
+    });
+
+    return this.editor.data.stringify(modelDocumentFragment);
   }
 
   /**
