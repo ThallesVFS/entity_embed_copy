@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\entity_embed\EventSubscriber;
 
+use Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\entity_embed\Event\EmbedButtonEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -14,7 +15,22 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class EmbedButtonSubscriber implements EventSubscriberInterface {
 
-  use StringTranslationTrait;
+  /**
+   * The CKEditor5 Plugin Manager.
+   *
+   * @var \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface
+   */
+  protected $ckeditor5PluginManager;
+
+  /**
+   * Creates EmbedButtonSubscriber object.
+   *
+   * @param \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface $ckeditor5_plugin_manager
+   *   The CKEditor5 Plugin Maanger service.
+   */
+  public function __construct(CKEditor5PluginManagerInterface $ckeditor5_plugin_manager) {
+    $this->ckeditor5PluginManager = $ckeditor5_plugin_manager;
+  }
 
   /**
    * {@inheritdoc}
@@ -36,7 +52,7 @@ class EmbedButtonSubscriber implements EventSubscriberInterface {
   public function onEmbedButtonUpdate(EmbedButtonEvent $event) {
     // Invalidate the CKEditor5 plugin cache, so new toolbar items will appear
     // based on how many Embed Buttons are in the system.
-    \Drupal::service('plugin.manager.ckeditor5.plugin')->clearCachedDefinitions();
+    $this->ckeditor5PluginManager->clearCachedDefinitions();
   }
 
 }
