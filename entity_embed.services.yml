@@ -12,6 +12,6 @@ services:
     arguments: ['@module_handler', '@plugin.manager.entity_embed.display']
   entity_embed.embed_button_subscriber:
     class: Drupal\entity_embed\EventSubscriber\EmbedButtonSubscriber
-    arguments: ['@plugin.manager.ckeditor5.plugin']
+    arguments: ['@?plugin.manager.ckeditor5.plugin']
     tags:
       - { name: event_subscriber }

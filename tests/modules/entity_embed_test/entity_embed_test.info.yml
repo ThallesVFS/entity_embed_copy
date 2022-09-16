@@ -12,3 +12,4 @@ dependencies:
  - drupal:editor
  - embed:embed
  - entity_embed:entity_embed
+ - ckeditor5:ckeditor5
