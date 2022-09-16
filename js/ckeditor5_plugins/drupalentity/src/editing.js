@@ -97,9 +97,29 @@ export default class EntityEmbedEditing extends Plugin {
           const modelElement = data.item;
           const container = conversionApi.mapper.toViewElement(data.item);
 
-          // @todo We still need to check for when the preview is loading.
-          let drupalEntity = viewWriter.createEditableElement('div');
-          viewWriter.insert(viewWriter.createPositionAt(container, 0), drupalEntity);
+          let drupalEntity = this._getPreviewContainer(container.getChildren());
+          // Use existing container if it exists, create on if it does not.
+          if (drupalEntity) {
+            // Stop processing if a preview is already loading.
+            if (drupalEntity.getAttribute('data-drupal-entity-preview') !== 'ready') {
+              return;
+            }
+            // Preview was ready meaning that a new preview can be loaded.
+            // "Change the attribute to loading to prepare for the loading of
+            // the updated preview. Preview is kept intact so that it remains
+            // interactable in the UI until the new preview has been rendered.
+            viewWriter.setAttribute(
+              'data-drupal-entity-preview',
+              'loading',
+              drupalEntity,
+            );
+          }
+          else {
+            drupalEntity = viewWriter.createRawElement('div', {
+              'data-drupal-entity-preview': 'loading',
+            });
+            viewWriter.insert(viewWriter.createPositionAt(container, 0), drupalEntity);
+          }
 
           this._loadPreview(modelElement).then(({ label, preview }) => {
             if (!drupalEntity) {
@@ -112,7 +132,7 @@ export default class EntityEmbedEditing extends Plugin {
             this.editor.editing.view.change((writer) => {
               const drupalEntityPreview = writer.createRawElement(
                 'div',
-                {'aria-label': label},
+                {'data-drupal-entity-preview': 'ready', 'aria-label': label},
                 (domElement) => {
                   domElement.innerHTML = preview;
                 },
@@ -189,6 +209,25 @@ export default class EntityEmbedEditing extends Plugin {
     });
 
     return this.editor.data.stringify(modelDocumentFragment);
+  }
+
+  _getPreviewContainer(children) {
+    for (const child of children) {
+      if (child.hasAttribute('data-drupal-entity-preview')) {
+        return child;
+      }
+
+      if (child.childCount) {
+        const recursive = this._getPreviewContainer(child.getChildren());
+        // Return only if preview container was found within this element's
+        // children.
+        if (recursive) {
+          return recursive;
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
