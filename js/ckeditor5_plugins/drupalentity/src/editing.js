@@ -1,5 +1,5 @@
 import { Plugin } from 'ckeditor5/src/core';
-import { Widget, toWidget, toWidgetEditable } from 'ckeditor5/src/widget';
+import { Widget, toWidget } from 'ckeditor5/src/widget';
 import EntityEmbedCommand from './command';
 
 export default class EntityEmbedEditing extends Plugin {
@@ -166,11 +166,12 @@ export default class EntityEmbedEditing extends Plugin {
     );
 
     if (response.ok) {
+      const label = Drupal.t('Entity Embed widget');
       const preview = await response.text();
-      return { preview };
+      return { label, preview };
     }
 
-    return { preview: this.previewError };
+    return { label: this.labelError, preview: this.previewError };
   }
 
   _renderElement(modelElement) {
