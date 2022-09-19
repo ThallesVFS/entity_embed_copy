@@ -401,5 +401,6 @@ function entity_embed_page_attachments(array &$page) {
       ];
     }
     $page['#attached']['drupalSettings']['embedButtons'] = $embed_buttons_data;
+    $page['#attached']['drupalSettings']['modulePath'] = \Drupal::service('extension.list.module')->getPath('entity_embed');
   }
 }
