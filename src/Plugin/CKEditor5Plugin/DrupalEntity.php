@@ -91,7 +91,7 @@ class DrupalEntity extends CKEditor5PluginDefault implements ContainerFactoryPlu
         'id' => $id,
         'name' => $label,
         'label' => $label,
-        'image' => $embed_button->getIconUrl(),
+        'icon' => $embed_button->getIconUrl(),
       ];
     }
     // Add configured embed buttons and pass it to the UI.
