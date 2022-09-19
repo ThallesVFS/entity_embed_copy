@@ -29,6 +29,7 @@ admin.entity_embed:
   js:
     js/entity_embed.set_dynamic_icons.js: {}
   dependencies:
+    - core/drupal
     - core/jquery
     - core/once
     - core/drupalSettings

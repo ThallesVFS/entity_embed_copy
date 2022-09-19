@@ -397,7 +397,6 @@ function entity_embed_page_attachments(array &$page) {
     foreach ($embed_buttons as $embed_button) {
       $embed_buttons_data[$embed_button->id()] = [
         'id' => $embed_button->id(),
-        'label' => Html::escape($embed_button->label()),
         'icon' => $embed_button->getIconUrl(),
       ];
     }
