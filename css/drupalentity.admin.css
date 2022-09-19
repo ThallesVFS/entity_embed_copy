@@ -1,8 +1,0 @@
-/* @todo This should be dynamically configured based on embed buttons configuration. */
-/* @todo There can be more than one embed button declared. */
-.ckeditor5-toolbar-button-node {
-  background-image: url(../js/plugins/drupalentity/entity.png);
-}
-.ckeditor5-toolbar-button-file {
-  background-image: url(../js/plugins/drupalentity/entity.png);
-}

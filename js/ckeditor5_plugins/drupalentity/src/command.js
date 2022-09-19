@@ -1,4 +1,4 @@
-import { Command } from 'ckeditor5/src/core';
+import {Command} from 'ckeditor5/src/core';
 
 export default class EntityEmbedCommand extends Command {
 
@@ -38,6 +38,5 @@ export default class EntityEmbedCommand extends Command {
 }
 
 function entityEmbed(writer, attributes) {
-  const drupalEntity = writer.createElement('drupalEntity', attributes);
-  return drupalEntity;
+  return writer.createElement('drupalEntity', attributes);
 }

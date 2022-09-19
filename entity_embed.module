@@ -347,7 +347,7 @@ function entity_embed_ckeditor5_plugin_info_alter(array &$plugin_definitions) {
         'provider' => 'entity_embed',
         'ckeditor5' => [
           'plugins' => [
-            'drupalentity.EntityEmbed'
+            'drupalentity.EntityEmbed',
           ],
           'config' => [],
         ],
@@ -378,5 +378,29 @@ function entity_embed_ckeditor5_plugin_info_alter(array &$plugin_definitions) {
     }
     // Update/create the plugin definition.
     $plugin_definitions[$plugin_id] = new CKEditor5PluginDefinition($embed_button_definition);
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function entity_embed_page_attachments(array &$page) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  // Attach the existing embed button ids and icons to the admin page of
+  // CKEditor5.
+  if ($route_name === 'entity.filter_format.edit_form') {
+    $embed_buttons_data = [];
+    $embed_buttons = \Drupal::entityTypeManager()
+      ->getStorage('embed_button')
+      ->loadMultiple();
+    /** @var \Drupal\embed\EmbedButtonInterface $embed_button */
+    foreach ($embed_buttons as $embed_button) {
+      $embed_buttons_data[$embed_button->id()] = [
+        'id' => $embed_button->id(),
+        'label' => Html::escape($embed_button->label()),
+        'icon' => $embed_button->getIconUrl(),
+      ];
+    }
+    $page['#attached']['drupalSettings']['embedButtons'] = $embed_buttons_data;
   }
 }

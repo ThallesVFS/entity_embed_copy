@@ -26,6 +26,9 @@ entity_embed:
     - core/ckeditor5
 
 admin.entity_embed:
-  css:
-    theme:
-      css/drupalentity.admin.css: { }
+  js:
+    js/entity_embed.set_dynamic_icons.js: {}
+  dependencies:
+    - core/jquery
+    - core/once
+    - core/drupalSettings
