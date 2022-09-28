@@ -365,7 +365,9 @@ function entity_embed_ckeditor5_plugin_info_alter(array &$plugin_definitions) {
             '<drupal-entity>',
             '<drupal-entity data-entity-type="' . $embed_button_id . '" data-entity-uuid>',
           ],
-          'conditions' => [],
+          'conditions' => [
+            'filter' => 'entity_embed',
+          ],
         ],
       ];
     }
