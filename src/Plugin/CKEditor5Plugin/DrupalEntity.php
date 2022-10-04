@@ -11,7 +11,6 @@ use Drupal\Core\Access\CsrfTokenGenerator;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\editor\EditorInterface;
-use Drupal\embed\Entity\EmbedButton;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

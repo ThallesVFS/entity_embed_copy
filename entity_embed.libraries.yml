@@ -24,6 +24,7 @@ entity_embed:
     js/build/drupalentity.js: { preprocess: false, minified: true }
   dependencies:
     - core/ckeditor5
+    - core/drupal
 
 admin.entity_embed:
   js:

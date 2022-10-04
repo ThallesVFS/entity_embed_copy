@@ -25,7 +25,6 @@ export default class EntityEmbedUI extends Plugin {
         let button = embed_buttons[id];
         let buttonView = new ButtonView(locale);
         // Set the icon to the SVG from config, or set it to the default icon.
-        // Currently, CKEditor5 only support SVGs @see IconView().
         // If the uploaded icon is an SVG, load it or use the default icon otherwise.
         let icon = null;
         if (button.icon.endsWith('svg')) {

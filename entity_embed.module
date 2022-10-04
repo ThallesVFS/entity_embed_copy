@@ -309,18 +309,16 @@ function entity_embed_field_widget_form_alter(&$element, FormStateInterface $for
  * Implements hook_entity_presave().
  */
 function entity_embed_entity_presave(EntityInterface $entity) {
-  // We are using the presave hook so we can subscribe to both create and
-  // update events without having to implement the code twice.
+  // We are using the presave hook, so we can invalidate the plugin cache
+  // on create and update events without having to implement the code twice.
   if (!$entity instanceof EmbedButtonInterface) {
     return;
   }
-  // Instantiate the event.
-  $event = new EmbedButtonEvent($entity);
-
-  // Dispatch the update event.
-  /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher */
-  $event_dispatcher = \Drupal::service('event_dispatcher');
-  $event_dispatcher->dispatch($event, EmbedButtonEvent::EMBED_BUTTON_UPDATED);
+  // Invalidate the CKEditor5 plugin cache, so new toolbar items will appear
+  // based on which Embed Buttons are configured.
+  /** @var \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface $ckeditor5_plugin_manager */
+  $ckeditor5_plugin_manager = \Drupal::service('plugin.manager.ckeditor5.plugin');
+  $ckeditor5_plugin_manager->clearCachedDefinitions();
 }
 
 /**

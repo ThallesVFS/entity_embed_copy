@@ -1,7 +1,7 @@
 {
-  "name": "drupal-ckeditor5",
+  "name": "drupal-entity-embed",
   "version": "1.0.0",
-  "description": "Drupal CKEditor 5 integration",
+  "description": "Drupal Entity Embed CKEditor 5 integration",
   "author": "",
   "license": "GPL-2.0-or-later",
   "scripts": {
