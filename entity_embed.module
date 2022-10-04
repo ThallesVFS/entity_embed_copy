@@ -317,8 +317,10 @@ function entity_embed_entity_presave(EntityInterface $entity) {
   // Invalidate the CKEditor5 plugin cache, so new toolbar items will appear
   // based on which Embed Buttons are configured.
   /** @var \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface $ckeditor5_plugin_manager */
-  $ckeditor5_plugin_manager = \Drupal::service('plugin.manager.ckeditor5.plugin');
-  $ckeditor5_plugin_manager->clearCachedDefinitions();
+  if (\Drupal::hasService('plugin.manager.ckeditor5.plugin')) {
+    $ckeditor5_plugin_manager = \Drupal::service('plugin.manager.ckeditor5.plugin');
+    $ckeditor5_plugin_manager->clearCachedDefinitions();
+  }
 }
 
 /**
