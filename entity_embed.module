@@ -158,7 +158,7 @@ function entity_embed_filter_format_edit_form_validate($form, FormStateInterface
     'status',
   ]);
 
-  if ($entity_embed_enabled && $filter_html_enabled && $allowed_html = $form_state->getValue($allowed_html_path)) {
+  if ($entity_embed_enabled && $filter_html_enabled && $form_state->getValue($allowed_html_path)) {
     if ($button_groups = $form_state->getValue($button_group_path)) {
       $buttons = [];
       $button_groups = json_decode($button_groups, TRUE);
