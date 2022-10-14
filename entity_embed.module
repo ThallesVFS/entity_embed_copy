@@ -5,6 +5,7 @@
  * Framework for allowing entities to be embedded in CKEditor.
  */
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -55,6 +56,11 @@ function template_preprocess_entity_embed_container(array &$variables) {
   $variables['element'] += ['#attributes' => []];
   $variables['attributes'] = $variables['element']['#attributes'];
   $variables['children'] = $variables['element']['#children'];
+
+  // Ensure the display settings get converted to a JSON string again.
+  if (isset($variables['attributes']['data-entity-embed-display-settings']) && is_array($variables['attributes']['data-entity-embed-display-settings'])) {
+    $variables['attributes']['data-entity-embed-display-settings'] = Json::encode($variables['attributes']['data-entity-embed-display-settings']);
+  }
 }
 
 /**
