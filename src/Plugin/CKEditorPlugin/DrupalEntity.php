@@ -56,18 +56,4 @@ class DrupalEntity extends EmbedCKEditorPluginBase implements CKEditorPluginCssI
     ];
   }
 
-  /**
-   * {@inheritdoc}
-   *
-   * Backwards compatible version for Drupal 9.2.
-   */
-  protected function getModulePath(string $module_name): string {
-    // CKEditorPluginBase::getModulePath() was added in Drupal 9.3+.
-    if (is_callable('parent::getModulePath')) {
-      return parent::getModulePath($module_name);
-    }
-
-    return \Drupal::service('extension.list.module')->getPath($module_name);
-  }
-
 }
