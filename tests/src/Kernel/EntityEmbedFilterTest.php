@@ -95,7 +95,7 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
           'data-entity-uuid' => static::EMBEDDED_ENTITY_UUID,
           'data-view-mode' => 'full',
         ],
-        'default',
+        'full',
         [
           'data-entity-type' => 'node',
           'data-view-mode' => 'full',
@@ -128,7 +128,7 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
           'data-entity-embed-display' => 'entity_reference:entity_reference_entity_view',
           'data-entity-embed-display-settings' => '{"view_mode":"full"}',
         ],
-        'default',
+        'full',
         [
           'data-entity-embed-display' => 'entity_reference:entity_reference_entity_view',
           'data-entity-embed-display-settings' => '{"view_mode":"full"}',
@@ -145,7 +145,7 @@ class EntityEmbedFilterTest extends EntityEmbedFilterTestBase {
           'data-entity-embed-display-settings' => '{"view_mode":"full"}',
           'data-view-mode' => 'some-invalid-view-mode',
         ],
-        'default',
+        'full',
         [
           'data-entity-embed-display' => 'entity_reference:entity_reference_entity_view',
           'data-entity-embed-display-settings' => '{"view_mode":"full"}',
