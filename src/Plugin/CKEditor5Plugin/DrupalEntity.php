@@ -15,6 +15,26 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * CKEditor 5 plugin.
+ *
+ * @CKEditor5Plugin(
+ *   id = "entity_embed_drupalentity",
+ *   ckeditor5 = @CKEditor5AspectsOfCKEditor5Plugin(
+ *     plugins = {"drupalentity.EntityEmbed"},
+ *     config = {},
+ *   ),
+ *   drupal = @DrupalAspectsOfCKEditor5Plugin(
+ *     deriver = "Drupal\entity_embed\Plugin\CKEditor5Plugin\DrupalEntityDeriver",
+ *     library = "entity_embed/entity_embed",
+ *     admin_library = "entity_embed/admin.entity_embed",
+ *     elements = {
+ *       "<drupal-entity>",
+ *       "<drupal-entity data-entity-uuid>",
+ *     },
+ *     conditions = {
+ *       "filter" = "entity_embed",
+ *     },
+ *   )
+ * )
  */
 class DrupalEntity extends CKEditor5PluginDefault implements ContainerFactoryPluginInterface {
 

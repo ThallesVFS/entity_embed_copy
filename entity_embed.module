@@ -324,66 +324,6 @@ function entity_embed_entity_presave(EntityInterface $entity) {
 }
 
 /**
- * Implements hook_ckeditor5_plugin_info_alter().
- */
-function entity_embed_ckeditor5_plugin_info_alter(array &$plugin_definitions) {
-  // We are altering the plugin info for CKEditor5 here, so whenever
-  // a new Embed Button is created/updated, the plugin definition will
-  // refresh and have the updated plugins. We are invalidating the cache in
-  // \Drupal\entity_embed\EventSubscriber\EmbedButtonSubscriber.
-  $embed_buttons = \Drupal::entityTypeManager()
-    ->getStorage('embed_button')
-    ->loadMultiple();
-  foreach ($embed_buttons as $embed_button) {
-    $embed_button_id = $embed_button->id();
-    $embed_button_label = Html::escape($embed_button->label());
-    $plugin_id = "entity_embed_{$embed_button_id}";
-    // Check if a plugin definition already exists for an embed button.
-    // If there is no such plugin definition, create it, otherwise update it.
-    if (!isset($plugin_definitions[$plugin_id])) {
-      // Create new plugin.
-      $embed_button_definition = [
-        'id' => $plugin_id,
-        'provider' => 'entity_embed',
-        'ckeditor5' => [
-          'plugins' => [
-            'drupalentity.EntityEmbed',
-          ],
-          'config' => [],
-        ],
-        'drupal' => [
-          'label' => t('Entity Embed - @label', ['@label' => $embed_button_label])->render(),
-          'class' => '\Drupal\entity_embed\Plugin\CKEditor5Plugin\DrupalEntity',
-          'library' => 'entity_embed/entity_embed',
-          'admin_library' => 'entity_embed/admin.entity_embed',
-          'toolbar_items' => [
-            $embed_button_id => [
-              'label' => $embed_button_label,
-            ],
-          ],
-          'elements' => [
-            '<drupal-entity>',
-            '<drupal-entity data-entity-type="' . $embed_button_id . '" data-entity-uuid>',
-          ],
-          'conditions' => [
-            'filter' => 'entity_embed',
-          ],
-        ],
-      ];
-    }
-    else {
-      // Update existing plugin.
-      $embed_button_definition = $plugin_definitions[$plugin_id];
-      // Update label of the plugin and toolbar item.
-      $embed_button_definition['drupal']['label'] = t('Entity Embed - @label', ['@label' => $embed_button_label])->render();
-      $embed_button_definition['drupal']['toolbar_items'][$embed_button_id]['label'] = $embed_button_label;
-    }
-    // Update/create the plugin definition.
-    $plugin_definitions[$plugin_id] = new CKEditor5PluginDefinition($embed_button_definition);
-  }
-}
-
-/**
  * Implements hook_page_attachments().
  */
 function entity_embed_page_attachments(array &$page) {
