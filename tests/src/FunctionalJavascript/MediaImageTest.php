@@ -716,7 +716,7 @@ class MediaImageTest extends EntityEmbedTestBase {
     // Configure a different default and admin theme, like on most Drupal sites.
     $this->config('system.theme')
       ->set('default', 'stable')
-      ->set('admin', 'classy')
+      ->set('admin', 'stark')
       ->save();
 
     // Assert that when looking at an embedded entity in the CKEditor Widget,
