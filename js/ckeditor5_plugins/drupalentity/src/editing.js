@@ -4,10 +4,16 @@ import EntityEmbedCommand from './command';
 
 export default class EntityEmbedEditing extends Plugin {
 
+  /**
+   * @inheritdoc
+   */
   static get requires() {
     return [Widget];
   }
 
+  /**
+   * @inheritdoc
+   */
   init() {
     this.attrs = {
       alt: 'alt',
@@ -41,6 +47,11 @@ export default class EntityEmbedEditing extends Plugin {
     );
   }
 
+  /**
+   * Registers drupalEntity as a block element in the DOM.
+   *
+   * @private
+   */
   _defineSchema() {
     const schema = this.editor.model.schema;
 
@@ -54,6 +65,11 @@ export default class EntityEmbedEditing extends Plugin {
     this.editor.editing.view.domConverter.blockElements.push('drupal-entity');
   }
 
+  /**
+   * Defines handling of drupalEntity elements.
+   *
+   * @private
+   */
   _defineConverters() {
     const {conversion} = this.editor;
 
@@ -170,6 +186,18 @@ export default class EntityEmbedEditing extends Plugin {
     });
   }
 
+  /**
+   * Loads the preview.
+   *
+   * @param modelElement
+   *   The model element which preview should be loaded.
+   * @returns {Promise<{preview: string, label: *}|{preview: *, label: string}>}
+   *   A promise that returns an object.
+   *
+   * @private
+   *
+   * @see DrupalMediaEditing::_fetchPreview().
+   */
   async _loadPreview(modelElement) {
     const query = {
       text: this._renderElement(modelElement),
@@ -194,6 +222,16 @@ export default class EntityEmbedEditing extends Plugin {
     return { label: this.labelError, preview: this.previewError };
   }
 
+  /**
+   * Renders the model element.
+   *
+   * @param modelElement
+   *   The drupalMedia model element to be converted.
+   * @returns {*}
+   *   The model element converted into HTML.
+   *
+   * @private
+   */
   _renderElement(modelElement) {
     // Create model document fragment which contains the model element so that
     // it can be stringified using the dataDowncast.
@@ -211,6 +249,16 @@ export default class EntityEmbedEditing extends Plugin {
     return this.editor.data.stringify(modelDocumentFragment);
   }
 
+  /**
+   * Gets the preview container element.
+   *
+   * @param children
+   *   The child elements.
+   * @returns {null|*}
+   *    The preview child element if available.
+   *
+   * @private
+   */
   _getPreviewContainer(children) {
     for (const child of children) {
       if (child.hasAttribute('data-drupal-entity-preview')) {
@@ -236,4 +284,5 @@ export default class EntityEmbedEditing extends Plugin {
   static get pluginName() {
     return 'EntityEmbedEditing';
   }
+
 }

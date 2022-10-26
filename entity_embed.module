@@ -7,6 +7,7 @@
 
 use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -320,29 +321,27 @@ function entity_embed_entity_presave(EntityInterface $entity) {
   if (\Drupal::hasService('plugin.manager.ckeditor5.plugin')) {
     $ckeditor5_plugin_manager = \Drupal::service('plugin.manager.ckeditor5.plugin');
     $ckeditor5_plugin_manager->clearCachedDefinitions();
+    Cache::invalidateTags(['library_info']);
   }
 }
 
 /**
- * Implements hook_page_attachments().
+ * Implements hook_library_info_alter().
  */
-function entity_embed_page_attachments(array &$page) {
-  $route_name = \Drupal::routeMatch()->getRouteName();
-  // Attach the existing embed button ids and icons to the admin page of
-  // CKEditor5.
-  if ($route_name === 'entity.filter_format.edit_form') {
-    $embed_buttons_data = [];
+function entity_embed_library_info_alter(&$libraries, $extension) {
+  // Create the drupalSettings dynamically based on embed buttons for the
+  // admin library.
+  if ($extension == 'entity_embed' && isset($libraries['admin.entity_embed'])) {
     $embed_buttons = \Drupal::entityTypeManager()
       ->getStorage('embed_button')
       ->loadMultiple();
-    /** @var \Drupal\embed\EmbedButtonInterface $embed_button */
     foreach ($embed_buttons as $embed_button) {
-      $embed_buttons_data[$embed_button->id()] = [
+      $libraries['admin.entity_embed']['drupalSettings']['embedButtons'][$embed_button->id()] = [
         'id' => $embed_button->id(),
         'icon' => $embed_button->getIconUrl(),
       ];
+
     }
-    $page['#attached']['drupalSettings']['embedButtons'] = $embed_buttons_data;
-    $page['#attached']['drupalSettings']['modulePath'] = \Drupal::service('extension.list.module')->getPath('entity_embed');
+    $libraries['admin.entity_embed']['drupalSettings']['modulePath'] = \Drupal::service('extension.list.module')->getPath('entity_embed');
   }
 }
