@@ -14,8 +14,6 @@ use Drupal\editor\EditorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * CKEditor 5 plugin.
- *
  * @CKEditor5Plugin(
  *   id = "entity_embed_drupalentity",
  *   ckeditor5 = @CKEditor5AspectsOfCKEditor5Plugin(

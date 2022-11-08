@@ -31,12 +31,22 @@ export default class EntityEmbedCommand extends Command {
     );
 
     model.change((writer) => {
-      model.insertContent(entityEmbed(writer, modelAttributes));
+      model.insertContent(createEntityEmbed(writer, modelAttributes));
     });
   }
 
+  refresh() {
+    const model = this.editor.model;
+    const selection = model.document.selection;
+    const allowedIn = model.schema.findAllowedParent(
+      selection.getFirstPosition(),
+      'drupalEntity',
+    );
+    this.isEnabled = allowedIn !== null;
+  };
+
 }
 
-function entityEmbed(writer, attributes) {
+function createEntityEmbed(writer, attributes) {
   return writer.createElement('drupalEntity', attributes);
 }

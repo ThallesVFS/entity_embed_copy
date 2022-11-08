@@ -49,12 +49,13 @@ class DrupalEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
+    assert($base_plugin_definition instanceof CKEditor5PluginDefinition);
     foreach ($this->embedButtonStorage->loadMultiple() as $embed_button) {
       $embed_button_id = $embed_button->id();
       $embed_button_label = Html::escape($embed_button->label());
       $plugin_id = "entity_embed_{$embed_button_id}";
       $definition = $base_plugin_definition->toArray();
-      $definition['id'] .= "_$embed_button_id";
+      $definition['id'] .= $embed_button_id;
       $definition['drupal']['label'] = $this->t('Entity Embed - @label', ['@label' => $embed_button_label])->render();
       $definition['drupal']['toolbar_items'] = [
         $embed_button_id => [

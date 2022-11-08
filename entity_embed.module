@@ -307,20 +307,16 @@ function entity_embed_field_widget_single_element_form_alter(&$element, FormStat
 }
 
 /**
- * Implements hook_entity_presave().
+ * Implements hook_ENTITY_TYPE_presave().
  */
-function entity_embed_entity_presave(EntityInterface $entity) {
-  // We are using the presave hook, so we can invalidate the plugin cache
-  // on create and update events without having to implement the code twice.
-  if (!$entity instanceof EmbedButtonInterface) {
-    return;
-  }
-  // Invalidate the CKEditor5 plugin cache, so new toolbar items will appear
+function entity_embed_embed_button_presave(EntityInterface $entity) {
+  // Invalidate the CKEditor 5 plugin cache, so new toolbar items will appear
   // based on which Embed Buttons are configured.
   /** @var \Drupal\ckeditor5\Plugin\CKEditor5PluginManagerInterface $ckeditor5_plugin_manager */
   if (\Drupal::hasService('plugin.manager.ckeditor5.plugin')) {
     $ckeditor5_plugin_manager = \Drupal::service('plugin.manager.ckeditor5.plugin');
     $ckeditor5_plugin_manager->clearCachedDefinitions();
+    // @see entity_embed_library_info_alter()
     Cache::invalidateTags(['library_info']);
   }
 }
@@ -331,7 +327,7 @@ function entity_embed_entity_presave(EntityInterface $entity) {
 function entity_embed_library_info_alter(&$libraries, $extension) {
   // Create the drupalSettings dynamically based on embed buttons for the
   // admin library.
-  if ($extension == 'entity_embed' && isset($libraries['admin.entity_embed'])) {
+  if ($extension === 'entity_embed' && isset($libraries['admin.entity_embed'])) {
     $embed_buttons = \Drupal::entityTypeManager()
       ->getStorage('embed_button')
       ->loadMultiple();

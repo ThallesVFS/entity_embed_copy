@@ -21,7 +21,7 @@ caption:
 # CKEditor 5
 entity_embed:
   js:
-    js/build/drupalentity.js: { preprocess: false, minified: true }
+    js/build/drupalentity.js: { minified: true }
   dependencies:
     - core/ckeditor5
     - core/drupal
