@@ -1,6 +1,6 @@
 import { Plugin } from 'ckeditor5/src/core';
 import { Widget, toWidget } from 'ckeditor5/src/widget';
-import EntityEmbedCommand from './command';
+import InsertEntityEmbedCommand from './command';
 
 export default class EntityEmbedEditing extends Plugin {
 
@@ -42,8 +42,8 @@ export default class EntityEmbedEditing extends Plugin {
     this._defineSchema();
     this._defineConverters();
     this.editor.commands.add(
-      'drupalentity',
-      new EntityEmbedCommand(this.editor),
+      'insertEntityEmbed',
+      new InsertEntityEmbedCommand(this.editor),
     );
   }
 

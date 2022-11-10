@@ -7,10 +7,22 @@ import { ButtonView } from 'ckeditor5/src/ui';
 import defaultIcon from '../entity.svg';
 
 export default class EntityEmbedUI extends Plugin {
+
+  /**
+   * @inheritdoc
+   */
+  static get requires() {
+    return ['Widget'];
+  }
+
+  /**
+   * @inheritdoc
+   */
   init() {
     const editor = this.editor;
-    const command = editor.commands.get('drupalentity');
+    const command = editor.commands.get('insertEntityEmbed');
     const options = editor.config.get('entityEmbed');
+    const viewDocument = editor.editing.view.document;
     if (!options) {
       return;
     }
@@ -46,7 +58,7 @@ export default class EntityEmbedUI extends Plugin {
           Drupal.ckeditor5.openDialog(
             libraryURL,
             ({ attributes }) => {
-              editor.execute('drupalentity', attributes);
+              editor.execute('insertEntityEmbed', attributes);
             },
             dialogSettings,
           ),
@@ -56,4 +68,12 @@ export default class EntityEmbedUI extends Plugin {
       })
     });
   }
+
+  /**
+   * @inheritdoc
+   */
+  static get pluginName() {
+    return 'EntityEmbedUI';
+  }
+
 }

@@ -1,6 +1,6 @@
 import {Command} from 'ckeditor5/src/core';
 
-export default class EntityEmbedCommand extends Command {
+export default class InsertEntityEmbedCommand extends Command {
 
   execute(attributes) {
     const { model } = this.editor;
