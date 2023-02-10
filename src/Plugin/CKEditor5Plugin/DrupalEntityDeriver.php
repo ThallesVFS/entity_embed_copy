@@ -50,6 +50,7 @@ class DrupalEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
     assert($base_plugin_definition instanceof CKEditor5PluginDefinition);
+    /** @var \Drupal\embed\EmbedButtonInterface $embed_button */
     foreach ($this->embedButtonStorage->loadMultiple() as $embed_button) {
       $embed_button_id = $embed_button->id();
       $embed_button_label = Html::escape($embed_button->label());
@@ -62,7 +63,8 @@ class DrupalEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
           'label' => $embed_button_label,
         ],
       ];
-      $definition['drupal']['elements'][] = '<drupal-entity data-entity-type="' . $embed_button_id . '">';
+      $definition['drupal']['elements'][] = '<drupal-entity data-embed-button="' . $embed_button_id . '">';
+      $definition['drupal']['elements'][] = '<drupal-entity data-entity-type="' . $embed_button->getTypeSetting('entity_type') . '">';
       $this->derivatives[$plugin_id] = new CKEditor5PluginDefinition($definition);
     }
 
