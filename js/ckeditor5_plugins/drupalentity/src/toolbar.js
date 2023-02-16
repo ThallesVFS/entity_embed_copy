@@ -15,20 +15,8 @@ export default class EntityEmbedToolbar extends Plugin {
    * @inheritdoc
    */
   init() {
-    this.attrs = {
-      alt: 'alt',
-      title: 'title',
-      dataCaption: 'data-caption',
-      dataAlign: 'data-align',
-      drupalEntityLangCode: 'data-langcode',
-      drupalEntityEntityType: 'data-entity-type',
-      drupalEntityEntityUuid: 'data-entity-uuid',
-      drupalEntityEmbedButton: 'data-embed-button',
-      drupalEntityEmbedDisplay: 'data-entity-embed-display',
-      drupalEntityEmbedDisplaySettings: 'data-entity-embed-display-settings',
-    };
-
     const editor = this.editor;
+    const entityEmbedEditing = editor.plugins.get('EntityEmbedEditing');
     const options = editor.config.get('entityEmbed');
     const { dialogSettings = {} } = options;
 
@@ -42,13 +30,13 @@ export default class EntityEmbedToolbar extends Plugin {
       })
 
       this.listenTo(buttonView, 'execute', (eventInfo) => {
-        const element = editor.model.document.selection.getSelectedElement();
-        const libraryURL = Drupal.url('entity-embed/dialog/' + options.format + '/' + element.getAttribute('drupalEntityEmbedButton'));
+        let element = editor.model.document.selection.getSelectedElement();
+        let libraryURL = Drupal.url('entity-embed/dialog/' + options.format + '/' + element.getAttribute('drupalEntityEmbedButton'));
 
-        const existingValues = {};
+        let existingValues = {};
 
-        for (const [key, value] of element.getAttributes()) {
-          const attribute = this.attrs[key]
+        for (let [key, value] of element.getAttributes()) {
+          let attribute = entityEmbedEditing.attrs[key]
           if (attribute) {
             existingValues[attribute] = value
           }
@@ -59,7 +47,6 @@ export default class EntityEmbedToolbar extends Plugin {
           libraryURL,
           existingValues,
           ({ attributes }) => {
-            console.debug(attributes)
             editor.execute('insertEntityEmbed', attributes);
           },
           dialogSettings,
