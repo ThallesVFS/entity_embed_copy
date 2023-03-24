@@ -1,5 +1,5 @@
 import { Plugin, icons } from 'ckeditor5/src/core';
-import { isWidget } from 'ckeditor5/src/widget';
+import { isWidget, WidgetToolbarRepository } from 'ckeditor5/src/widget';
 import { ButtonView } from "ckeditor5/src/ui";
 
 export default class EntityEmbedToolbar extends Plugin {
@@ -8,7 +8,7 @@ export default class EntityEmbedToolbar extends Plugin {
    * @inheritdoc
    */
   static get requires() {
-    return ['WidgetToolbarRepository'];
+    return [WidgetToolbarRepository];
   }
 
   /**
@@ -48,6 +48,7 @@ export default class EntityEmbedToolbar extends Plugin {
           existingValues,
           ({ attributes }) => {
             editor.execute('insertEntityEmbed', attributes);
+            editor.editing.view.focus();
           },
           dialogSettings,
         )
