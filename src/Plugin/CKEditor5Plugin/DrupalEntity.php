@@ -27,6 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *     elements = {
  *       "<drupal-entity>",
  *       "<drupal-entity alt title data-align data-caption data-entity-embed-display data-entity-embed-display-settings data-entity-uuid>",
+ *       "<drupal-entity data-langcode>",
  *     },
  *     conditions = {
  *       "filter" = "entity_embed",
