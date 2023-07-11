@@ -4,8 +4,11 @@ namespace Drupal\entity_embed\Plugin\CKEditor4To5Upgrade;
 
 use Drupal\ckeditor5\HTMLRestrictions;
 use Drupal\ckeditor5\Plugin\CKEditor4To5UpgradePluginInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\filter\FilterFormatInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the CKEditor 4 to 5 upgrade path for entity embed buttons.
@@ -23,7 +26,47 @@ use Drupal\filter\FilterFormatInterface;
  * @internal
  *   Plugin classes are internal.
  */
-class EntityEmbed extends PluginBase implements CKEditor4To5UpgradePluginInterface {
+class EntityEmbed extends PluginBase implements CKEditor4To5UpgradePluginInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * EntityEmbed constructor.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param \Drupal\ckeditor5\Plugin\CKEditor4To5UpgradePluginInterface $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The Entity Type Manager service.
+   */
+  public function __construct(array $configuration,
+    string $plugin_id,
+    CKEditor4To5UpgradePluginInterface $plugin_definition,
+    EntityTypeManagerInterface $entity_type_manager
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -31,7 +74,7 @@ class EntityEmbed extends PluginBase implements CKEditor4To5UpgradePluginInterfa
   public function mapCKEditor4ToolbarButtonToCKEditor5ToolbarItem(string $cke4_button, HTMLRestrictions $text_format_html_restrictions): ?array {
     $buttons = [];
 
-    $embed_buttons = \Drupal::entityTypeManager()
+    $embed_buttons = $this->entityTypeManager
       ->getStorage('embed_button')
       ->loadMultiple();
     foreach ($embed_buttons as $embed_button) {
@@ -59,4 +102,5 @@ class EntityEmbed extends PluginBase implements CKEditor4To5UpgradePluginInterfa
   public function computeCKEditor5PluginSubsetConfiguration(string $cke5_plugin_id, FilterFormatInterface $text_format): ?array {
     throw new \OutOfBoundsException();
   }
+
 }
