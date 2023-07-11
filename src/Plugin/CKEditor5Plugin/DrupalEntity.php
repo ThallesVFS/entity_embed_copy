@@ -99,7 +99,7 @@ class DrupalEntity extends CKEditor5PluginDefault implements ContainerFactoryPlu
     $embed_buttons = $this
       ->entityTypeManager
       ->getStorage('embed_button')
-      ->loadMultiple();
+      ->loadByProperties(['type_id' => 'entity']);
     $buttons = [];
     /** @var \Drupal\embed\EmbedButtonInterface $embed_button */
     foreach ($embed_buttons as $embed_button) {

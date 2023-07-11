@@ -76,7 +76,7 @@ class EntityEmbed extends PluginBase implements CKEditor4To5UpgradePluginInterfa
 
     $embed_buttons = $this->entityTypeManager
       ->getStorage('embed_button')
-      ->loadMultiple();
+      ->loadByProperties(['type_id' => 'entity']);
     foreach ($embed_buttons as $embed_button) {
       $buttons[] = $embed_button->id();
     }

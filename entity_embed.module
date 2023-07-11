@@ -330,7 +330,7 @@ function entity_embed_library_info_alter(&$libraries, $extension) {
   if ($extension === 'entity_embed' && isset($libraries['admin.entity_embed'])) {
     $embed_buttons = \Drupal::entityTypeManager()
       ->getStorage('embed_button')
-      ->loadMultiple();
+      ->loadByProperties(['type_id' => 'entity']);
     foreach ($embed_buttons as $embed_button) {
       $libraries['admin.entity_embed']['drupalSettings']['embedButtons'][$embed_button->id()] = [
         'id' => $embed_button->id(),
