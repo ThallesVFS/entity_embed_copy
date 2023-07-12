@@ -29,7 +29,7 @@ export default class EntityEmbedEditing extends Plugin {
     };
     const options = this.editor.config.get('entityEmbed');
     if (!options) {
-      return;
+      throw new Error('Error on initializing entityEmbed plugin: entityEmbed config is required.');
     }
     this.options = options;
     this.labelError = Drupal.t('Preview failed');
