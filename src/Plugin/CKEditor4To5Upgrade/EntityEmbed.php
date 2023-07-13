@@ -42,14 +42,14 @@ class EntityEmbed extends PluginBase implements CKEditor4To5UpgradePluginInterfa
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
    *   The plugin_id for the plugin instance.
-   * @param \Drupal\ckeditor5\Plugin\CKEditor4To5UpgradePluginInterface $plugin_definition
+   * @param array $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The Entity Type Manager service.
    */
   public function __construct(array $configuration,
     string $plugin_id,
-    CKEditor4To5UpgradePluginInterface $plugin_definition,
+    array $plugin_definition,
     EntityTypeManagerInterface $entity_type_manager
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
