@@ -74,11 +74,12 @@ class EntityEmbed extends PluginBase implements CKEditor4To5UpgradePluginInterfa
   public function mapCKEditor4ToolbarButtonToCKEditor5ToolbarItem(string $cke4_button, HTMLRestrictions $text_format_html_restrictions): ?array {
     $buttons = [];
 
-    $embed_buttons = $this->entityTypeManager
+    $entity_embed_buttons = $this->entityTypeManager
       ->getStorage('embed_button')
+      // @see \Drupal\entity_embed\Plugin\EmbedType\Entity
       ->loadByProperties(['type_id' => 'entity']);
-    foreach ($embed_buttons as $embed_button) {
-      $buttons[] = $embed_button->id();
+    foreach ($entity_embed_buttons as $entity_embed_button) {
+      $buttons[] = $entity_embed_button->id();
     }
     foreach ($buttons as $button) {
       if ($cke4_button == $button) {

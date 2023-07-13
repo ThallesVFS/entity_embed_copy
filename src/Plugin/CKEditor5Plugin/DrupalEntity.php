@@ -96,20 +96,21 @@ class DrupalEntity extends CKEditor5PluginDefault implements ContainerFactoryPlu
   public function getDynamicPluginConfig(array $static_plugin_config, EditorInterface $editor): array {
     // Register embed buttons as individual buttons on admin pages.
     $dynamic_plugin_config = $static_plugin_config;
-    $embed_buttons = $this
+    $entity_embed_buttons = $this
       ->entityTypeManager
       ->getStorage('embed_button')
+      // @see \Drupal\entity_embed\Plugin\EmbedType\Entity
       ->loadByProperties(['type_id' => 'entity']);
     $buttons = [];
     /** @var \Drupal\embed\EmbedButtonInterface $embed_button */
-    foreach ($embed_buttons as $embed_button) {
-      $id = $embed_button->id();
-      $label = Html::escape($embed_button->label());
+    foreach ($entity_embed_buttons as $entity_embed_button) {
+      $id = $entity_embed_button->id();
+      $label = Html::escape($entity_embed_button->label());
       $buttons[$id] = [
         'id' => $id,
         'name' => $label,
         'label' => $label,
-        'icon' => $embed_button->getIconUrl(),
+        'icon' => $entity_embed_button->getIconUrl(),
       ];
     }
     // Add configured embed buttons and pass it to the UI.

@@ -328,13 +328,14 @@ function entity_embed_library_info_alter(&$libraries, $extension) {
   // Create the drupalSettings dynamically based on embed buttons for the
   // admin library.
   if ($extension === 'entity_embed' && isset($libraries['admin.entity_embed'])) {
-    $embed_buttons = \Drupal::entityTypeManager()
+    $entity_embed_buttons = \Drupal::entityTypeManager()
       ->getStorage('embed_button')
+      // @see \Drupal\entity_embed\Plugin\EmbedType\Entity
       ->loadByProperties(['type_id' => 'entity']);
-    foreach ($embed_buttons as $embed_button) {
-      $libraries['admin.entity_embed']['drupalSettings']['embedButtons'][$embed_button->id()] = [
-        'id' => $embed_button->id(),
-        'icon' => $embed_button->getIconUrl(),
+    foreach ($entity_embed_buttons as $entity_embed_button) {
+      $libraries['admin.entity_embed']['drupalSettings']['embedButtons'][$entity_embed_button->id()] = [
+        'id' => $entity_embed_button->id(),
+        'icon' => $entity_embed_button->getIconUrl(),
       ];
 
     }
