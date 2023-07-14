@@ -23,6 +23,7 @@ export default class EntityEmbedEditing extends Plugin {
       drupalEntityLangCode: 'data-langcode',
       drupalEntityEntityType: 'data-entity-type',
       drupalEntityEntityUuid: 'data-entity-uuid',
+      drupalEntityViewMode: 'data-view-mode',
       drupalEntityEmbedButton: 'data-embed-button',
       drupalEntityEmbedDisplay: 'data-entity-embed-display',
       drupalEntityEmbedDisplaySettings: 'data-entity-embed-display-settings',

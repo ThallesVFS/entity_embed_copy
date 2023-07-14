@@ -26,7 +26,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *     admin_library = "entity_embed/admin.entity_embed",
  *     elements = {
  *       "<drupal-entity>",
- *       "<drupal-entity alt title data-align data-caption data-entity-embed-display data-entity-embed-display-settings data-entity-uuid>",
+ *       "<drupal-entity alt title data-align data-caption data-entity-embed-display data-entity-embed-display-settings data-view-mode data-entity-uuid>",
  *       "<drupal-entity data-langcode>",
  *     },
  *     conditions = {
