@@ -305,9 +305,11 @@ class Entity extends EmbedTypeBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function getDefaultIconUrl() {
-    return $this->fileUrlGenerator->generateAbsoluteString(
-      $this->moduleExtensionList->getPath('entity_embed') . '/js/build/ckeditor5_plugins/drupalentity/entity.svg'
-    );
+    $path = $this->moduleHandler()->moduleExists('ckeditor5') ?
+      '/js/ckeditor5_plugins/drupalentity/entity.svg' :
+      '/js/plugins/drupalentity/entity.png';
+
+    return $this->fileUrlGenerator->generateAbsoluteString($this->moduleExtensionList->getPath('entity_embed') . $path);
   }
 
   /**
