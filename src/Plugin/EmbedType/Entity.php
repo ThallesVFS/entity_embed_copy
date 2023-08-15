@@ -67,7 +67,7 @@ class Entity extends EmbedTypeBase implements ContainerFactoryPluginInterface {
    *
    * @var \Drupal\Core\Extension\ModuleExtensionList
    */
-  protected ModuleExtensionList $moduleExtensionList;
+  protected $moduleExtensionList;
 
   /**
    * {@inheritdoc}
