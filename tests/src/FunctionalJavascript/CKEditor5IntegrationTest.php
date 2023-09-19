@@ -722,8 +722,8 @@ class CKEditor5IntegrationTest extends WebDriverTestBase {
     $url = $this->host->toUrl('edit-form');
     $this->drupalGet($url);
     $this->waitForEditor();
-    $assert_session->waitForLink('default alt');
-    $page->find('css', '.ck .drupal-entity a')->click();
+    $assert_session->waitForText('Vacationing in Belgium');
+    $page->find('css', '.ck .drupal-entity')->click();
     // Assert that the entity preview is not clickable by comparing the URL.
     $this->assertEquals($url->toString(), $this->getUrl());
   }

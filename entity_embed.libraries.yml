@@ -22,6 +22,9 @@ caption:
 entity_embed:
   js:
     js/build/drupalentity.js: { minified: true }
+  css:
+    theme:
+      css/drupalentity.css: { }
   dependencies:
     - core/ckeditor5
     - core/drupal
