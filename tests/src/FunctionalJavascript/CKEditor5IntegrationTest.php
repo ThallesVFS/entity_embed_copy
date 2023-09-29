@@ -605,7 +605,7 @@ class CKEditor5IntegrationTest extends WebDriverTestBase {
     $this->assertNotEmpty($drupalmedia = $assert_session->waitForElementVisible('css', '.ck-content .ck-widget.drupal-entity'));
     $drupalmedia->click();
 
-    $this->assertVisibleBalloon('.ck-toolbar[aria-label="Drupal Entity toolbar"]');
+    $this->assertVisibleBalloon('.ck-toolbar[aria-label="Drupal Media toolbar"]');
     $this->getBalloonButton('Link entity')->click();
 
     $balloon = $this->assertVisibleBalloon('.ck-link-form');
@@ -631,7 +631,7 @@ class CKEditor5IntegrationTest extends WebDriverTestBase {
 
     // Finally, ensure that entity can be unlinked.
     $drupalmedia->click();
-    $this->assertVisibleBalloon('.ck-toolbar[aria-label="Drupal Entity toolbar"]');
+    $this->assertVisibleBalloon('.ck-toolbar[aria-label="Drupal Media toolbar"]');
     $this->getBalloonButton('Link entity')->click();
     $this->assertVisibleBalloon('.ck-link-actions');
     $this->getBalloonButton('Unlink')->click();
