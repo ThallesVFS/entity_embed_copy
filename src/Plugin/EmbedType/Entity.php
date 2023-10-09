@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeRepositoryInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -62,6 +63,13 @@ class Entity extends EmbedTypeBase implements ContainerFactoryPluginInterface {
   protected $fileUrlGenerator;
 
   /**
+   * Module list services.
+   *
+   * @var \Drupal\Core\Extension\ModuleExtensionList
+   */
+  protected $moduleExtensionList;
+
+  /**
    * {@inheritdoc}
    *
    * @param array $configuration
@@ -81,13 +89,24 @@ class Entity extends EmbedTypeBase implements ContainerFactoryPluginInterface {
    * @param \Drupal\Core\File\FileUrlGeneratorInterface
    *   The file URL generator.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, EntityTypeRepositoryInterface $entity_type_repository, EntityTypeBundleInfoInterface $bundle_info, EntityEmbedDisplayManager $display_plugin_manager, FileUrlGeneratorInterface $file_url_generator) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    EntityTypeManagerInterface $entity_type_manager,
+    EntityTypeRepositoryInterface $entity_type_repository,
+    EntityTypeBundleInfoInterface $bundle_info,
+    EntityEmbedDisplayManager $display_plugin_manager,
+    FileUrlGeneratorInterface $file_url_generator,
+    ModuleExtensionList $module_extension_list
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
     $this->entityTypeRepository = $entity_type_repository;
     $this->entityTypeBundleInfo = $bundle_info;
     $this->displayPluginManager = $display_plugin_manager;
     $this->fileUrlGenerator = $file_url_generator;
+    $this->moduleExtensionList = $module_extension_list;
   }
 
   /**
@@ -102,7 +121,8 @@ class Entity extends EmbedTypeBase implements ContainerFactoryPluginInterface {
       $container->get('entity_type.repository'),
       $container->get('entity_type.bundle.info'),
       $container->get('plugin.manager.entity_embed.display'),
-      $container->get('file_url_generator')
+      $container->get('file_url_generator'),
+      $container->get('extension.list.module'),
     );
   }
 
@@ -285,7 +305,11 @@ class Entity extends EmbedTypeBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function getDefaultIconUrl() {
-    return $this->fileUrlGenerator->generateAbsoluteString(\Drupal::service('extension.list.module')->getPath('entity_embed') . '/js/plugins/drupalentity/entity.png');
+    $path = $this->moduleHandler()->moduleExists('ckeditor5') ?
+      '/js/ckeditor5_plugins/drupalentity/entity.svg' :
+      '/js/plugins/drupalentity/entity.png';
+
+    return $this->fileUrlGenerator->generateAbsoluteString($this->moduleExtensionList->getPath('entity_embed') . $path);
   }
 
   /**

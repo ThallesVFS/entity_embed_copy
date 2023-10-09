@@ -4,12 +4,13 @@ description: 'Aids in testing translation within entity embed'
 package: Testing
 dependencies:
  - drupal:content_translation
+ - drupal:ckeditor
+ - drupal:ckeditor5
  - drupal:file
  - drupal:image
  - drupal:node
  - drupal:text
  - drupal:media
- - drupal:ckeditor
  - drupal:editor
  - embed:embed
  - entity_embed:entity_embed
